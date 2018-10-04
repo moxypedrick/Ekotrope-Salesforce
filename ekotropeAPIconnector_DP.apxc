@@ -17,7 +17,7 @@ public class ekotropeAPIconnector_DP {
         HttpRequest request = new HttpRequest();
 		request.setEndpoint('https://app.ekotrope.com/api/v1/projects/'+project);
 		request.setMethod('GET');
-		request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');     
+		request.setHeader('authorization', 'Basic ################################');     
 		HttpResponse projectResponse = http.send(request); 
         return projectResponse;
             
@@ -47,7 +47,7 @@ public class ekotropeAPIconnector_DP {
         HttpRequest request = new HttpRequest();
         request.setEndpoint('https://app.ekotrope.com/api/v1/planAnalysis/'+planID+'?buildingType='+ buildingType + codesString);
 		request.setMethod('GET');
-		request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');
+		request.setHeader('authorization', 'Basic ################################');
 		HttpResponse planAnalysisResponse = http.send(request); 
         return planAnalysisResponse;
                
@@ -59,7 +59,7 @@ public class ekotropeAPIconnector_DP {
 		HttpRequest request = new HttpRequest();
 		request.setEndpoint('https://api.ekotrope.com/api/v1/resnet/registeredProjects/'+planID);
 		request.setMethod('PUT');
-		request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');
+		request.setHeader('authorization', 'Basic ################################');
         request.setTimeout(20000);
 		HttpResponse putResponse = http.send(Request); 
         return putResponse;
