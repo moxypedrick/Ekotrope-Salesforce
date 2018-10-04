@@ -12,8 +12,8 @@
 
 global class SERHprojectRegistryUpdater implements Database.Batchable<String>, Database.AllowsCallouts, Database.Stateful{
 
-    global String username = 'southface-api';
-    global String password = 'wYFUCL5z';
+    global String username = '##########';
+    global String password = '##########';
     global String newProjectsList = '';
     private String ekotropeStatus = '';
     private String updateStatus = '';
