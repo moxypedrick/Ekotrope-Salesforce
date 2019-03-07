@@ -1,8 +1,8 @@
 public class serhRecordConstructor{
     
 
-	public static Project__C constructProject(projectJSON2Apex.aProjectJSON2Apex aProject, analysisJson2Apex.pAnalysisJson2Apex bsIsAnalysisResults, String HERSrater, Id RFI, String ratingOrganization, String status, String updateStatus) {
-		Date EC_Registration_Date = Date.newInstance(1999, 1, 1);
+  public static Project__C constructProject(projectJSON2Apex.aProjectJSON2Apex aProject, analysisJson2Apex.pAnalysisJson2Apex bsIsAnalysisResults, String HERSrater, Id RFI, String ratingOrganization, String status, String updateStatus) {
+    Date EC_Registration_Date = Date.newInstance(1999, 1, 1);
         Date Rating_Date = Date.newInstance(1999, 1, 1);
         projectJSON2Apex.aProjectJSON2Apex qProject = aProject;
         analysisJson2Apex.pAnalysisJson2Apex qAnalyis = bsIsAnalysisResults;
@@ -54,7 +54,7 @@ public class serhRecordConstructor{
             State__c = qProject.location.state,
             Zip_Code__c = qProject.location.zip,
             RecordTypeId = '0120B000000t8JVQAY',
-            OwnerId = '005U0000001vPx2',
+            OwnerId = '0050B000007wSmS',
             Ekotrope_selfOrPlanLastSavedAt__c = qProject.selfOrPlanLastSavedAt,
             Rating_Organization__c = ratingOrganization,
             Rating_Field_Inspector__c = RFI,
@@ -68,7 +68,7 @@ public class serhRecordConstructor{
         //projectRecord.SERH_Number_of_Units__c = 1;
                 
         return projectRecord;
-	}
+  }
     
     public static SERH_Data__C constructDataRecord(projectJSON2Apex.aProjectJSON2Apex bProject, planJson2Apex.aPlanJson2Apex rplan, analysisJson2Apex.pAnalysisJson2Apex bsIsAnalysisResults,  analysisJson2Apex.pAnalysisJson2Apex RefAnalysisResults,  analysisJson2Apex.pAnalysisJson2Apex DesAnalysisResults, String arecordType) {
         
@@ -152,7 +152,7 @@ public class serhRecordConstructor{
         if(qProject.hersRatingDetails.rater.RatingCompany.id == 'JVYyEeYW'){
             fee = 55;
         } else if(qProject.hersRatingDetails.ratingType == 'Sampled'){
-			fee = 30;            
+      fee = 30;            
         } else if(qProject.name.containsIgnoreCase('repeat') && energyStar == 'PASS'){//qProject.name.containsIgnoreCase('estar')){
             fee = 50;
         } else if(qProject.name.containsIgnoreCase('repeat') && energyStar != 'PASS'){//!qProject.name.containsIgnoreCase('estar')){
@@ -201,7 +201,7 @@ public class serhRecordConstructor{
             Fee_per_Unit__c = fee,
             Export_Type__c = recordType,
             BD_Infiltration_Units__c = 'cfm50',
-            OwnerId = '005U0000001vPx2',
+            OwnerId = '0050B000007wSmS',
             CO2_lbs__c = AsIsAnalysisResults.emissions.summary.totalCo2,
             NOX_lbs__c = AsIsAnalysisResults.emissions.summary.totalNox,
             SO2_lbs__c = AsIsAnalysisResults.emissions.summary.totalSo2,
