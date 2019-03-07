@@ -12,8 +12,8 @@
 
 global class SERHprojectRegistryUpdater implements Database.Batchable<String>, Database.AllowsCallouts, Database.Stateful{
 
-    global String username = '##########';
-    global String password = '##########';
+    global String username = '########';
+    global String password = '########';
     global String newProjectsList = '';
     private String ekotropeStatus = '';
     private String updateStatus = '';
@@ -143,7 +143,7 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
             }
             
             //projectIdList.addAll(projectMap.keySet());    
-        	return projectIdList;   
+          return projectIdList;   
         }
     } 
 
@@ -204,12 +204,16 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
             
            
             String HERS_Rater =  raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
-            
+            String raterId = null;
             String RFI_Rater = null;
             if (qProject.hersRatingDetails.associatedUsers.size() > 0){
                 //if (qProject.hersRatingDetails.associatedUsers[0] instanceOf projectJSON2Apex.associatedUsers){
-                    RFI_Rater = raterMap.get(String.valueof(qProject.hersRatingDetails.associatedUsers[0].fieldInspectorId));
-                
+                if (qProject.hersRatingDetails.associatedUsers[0].userType == 'Rater'){
+                    raterId = qProject.hersRatingDetails.associatedUsers[0].resnetRaterId;
+                } else if (qProject.hersRatingDetails.associatedUsers[0].userType == 'FieldInspector'){
+                    raterId = qProject.hersRatingDetails.associatedUsers[0].fieldInspectorId;
+                }
+                    RFI_Rater = raterMap.get(raterId);
             } else{
                 RFI_Rater = raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
             }      
@@ -223,8 +227,8 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
             ekotropeIdList.add(projectRecord); 
             serhDataList.add(serhRecord);          
         }
-        //System.Debug(ekotropeIdList);
-        upsert ekotropeIdList Project__c.Fields.Ekotrope_ID__c; 
+        System.Debug(ekotropeIdList);
+        upsert ekotropeIdList Ekotrope_ID__c; 
         
         for (Project__c aProject : ekotropeIdList){
             projectMap.put(aProject.Ekotrope_ID__c, aProject.id);
@@ -233,7 +237,7 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
             sData.Project__c = projectMap.get(ekotropeMap.get(sData.Ekotrope_Plan_ID__c));
         }  
         System.Debug(serhDataList);
- 		upsert serhDataList SERH_Data__c.Fields.Ekotrope_Plan_ID__c; 
+     upsert serhDataList SERH_Data__c.Fields.Ekotrope_Plan_ID__c; 
         serhDataList.clear();
         ekotropeIdList.clear();
         }
@@ -271,13 +275,13 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
                 String DesignAnalysis = String.valueOf(DesignanalysisResponse.getBody());
                 analysisJson2Apex.pAnalysisJson2Apex DesignAnalysisResults = analysisJson2Apex.parse(DesignAnalysis); 
 
-            	String HERS_Rater =  raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
-           		String ratingOrganization = accountsMap.get(String.valueof(qProject.hersRatingDetails.rater.ratingCompany.id));
- 	
-            	SERH_Data__c SerhRecord = serhRecordConstructor.constructDataRecord(qProject, qplan, AsIsAnalysisResults, ReferencenalysisResults, DesignAnalysisResults, dataPrefix);
+              String HERS_Rater =  raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
+               String ratingOrganization = accountsMap.get(String.valueof(qProject.hersRatingDetails.rater.ratingCompany.id));
+   
+              SERH_Data__c SerhRecord = serhRecordConstructor.constructDataRecord(qProject, qplan, AsIsAnalysisResults, ReferencenalysisResults, DesignAnalysisResults, dataPrefix);
             
-            	//ekotropeIdList.add(projectRecord); 
-            	serhDataList.add(serhRecord); 
+              //ekotropeIdList.add(projectRecord); 
+              serhDataList.add(serhRecord); 
             }
             
         //upsert ekotropeIdList Project__c.Fields.Ekotrope_ID__c; 
@@ -295,7 +299,7 @@ global class SERHprojectRegistryUpdater implements Database.Batchable<String>, D
             sData.Project__c = idMap.get(sData.Ekotrope_Plan_ID__c);
         }  
         
- 		insert serhDataList; 
+     insert serhDataList; 
         serhDataList.clear();
         ekotropeIdList.clear();
         
