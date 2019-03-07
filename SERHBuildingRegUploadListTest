@@ -1,0 +1,98 @@
+@isTest public class SERHBuildingRegUploadListTest {
+    /**
+    @isTest static void TestPager() {
+        Id rtid = [SELECT Id from Recordtype where name like '%SERH%' and sobjecttype = 'ProjecT__c' limit 1][0].Id;
+        Project__c proj1 = new Project__c(name='testProj', Project_Status__c = 'In Progress', recordtypeid=rtid);
+        insert(proj1);
+        SERHBuildingRegUploadList clss1 = new SERHBuildingRegUploadList();
+
+
+        SERHBuildingRegUploadList.ProjWrapper wrapIt = new SERHBuildingRegUploadList.ProjWrapper();
+        SERHBuildingRegUploadList.ProjWrapper wrapIt2 = new SERHBuildingRegUploadList.ProjWrapper(proj1);
+        wrapit2.checked=true;
+        //System.assert(clss1.getProjects().size() == 1, 'Projects equals one?');
+        
+        Test.startTest();
+        clss1.cancel();
+        clss1.first();
+        System.assert(clss1.hasNext == false);
+        System.assert(clss1.hasPrevious==false);
+        System.assert(clss1.pageNumber==1);
+        clss1.last();
+        clss1.next();
+        clss1.previous();
+        clss1.process();
+        //clss1.getProjects()[0].checked = true;
+        clss1.getProjects().add(wrapit2);
+        clss1.process();
+        test.stopTest();
+        
+    }
+**/
+    @isTest static void TestPager(){
+        //check initializations
+        SERHBuildingRegUploadList clss2 = new SERHBuildingRegUploadList();
+        clss2.getProjects();
+        clss2.process();
+        SERHBuildingRegUploadList.ProjWrapper pw1 = new SERHBuildingRegUploadList.ProjWrapper();
+        
+        //bogus account
+        Account duckedEsting = new Account(Name = 'Ducked Esting');
+        insert(duckedEsting);
+        
+        //bogus contacts -- with various rating statuses
+        list<Contact> toIns = new list<Contact>();
+        toIns.add(new Contact(FirstName = 'Bill', LastName = 'DingEnvelope', accountid=duckedEsting.id));
+        toIns.add(new Contact(FirstName = 'Sir', LastName = 'H', Number_of_Units_this_year_SERH__c = 201, accountid=duckedEsting.id));
+        toIns.add(new Contact(FirstName = 'R', LastName = 'Fortinay', Number_of_Units_this_year_SERH__c = 277, Number_of_File_QA_Started__c = 1, accountid=duckedEsting.id));
+        insert(toIns);
+        
+        //make projects to iterate over
+        Id rtid = [SELECT Id from Recordtype where name like '%SERH%' and sobjecttype = 'Project__c' limit 1][0].Id;
+        list<Project__c> pToIns = new list<Project__c>();
+        Project__c proj1 = new Project__c(name='testProj', Project_Status__c = 'In Progress', recordtypeid=rtid, Hers_Rater__C = toIns[0].id);
+        pToIns.add(proj1);
+        pToIns.add(new Project__c(name='testProj2', Project_Status__c = 'In Progress', recordtypeid=rtid, Hers_Rater__C = toIns[1].id));
+        pToIns.add(new Project__c(name='testProj3', Project_Status__c = 'In Progress', recordtypeid=rtid, Hers_Rater__C = toIns[2].id));
+        pToIns.add(new Project__c(name = 'testProj4NoR8r', Project_Status__c = 'In Progress', recordtypeid=rtid));
+        insert(pToIns);
+        
+        //for ref
+        //SERH_Data__c currDat = p.SERH_Data__r[0];
+        //        RatingType = currDat.Rating_Type__c;
+          //      ESv3Status = currDat.ENERGY_STAR_v3__c;
+          //      
+        //And, an SERH Data:
+        insert(new SERH_Data__C(project__c = proj1.id, Export_Type__c = 'HERS', Rating_type__c = 'CONFIRMED', ENERGY_STAR_v3__c = 'Pass'));
+        
+        Test.startTest();
+        SERHBuildingRegUploadList clss1 = new SERHBuildingRegUploadList();
+        System.Debug(clss1.getProjects().size());
+        System.Debug('Records: ' + String.valueof(clss1.con.getRecords().size()));
+        clss1.process();
+        for (SERHBuildingRegUploadList.ProjWrapper i: clss1.getProjects()){
+            i.checked=true;
+            System.Debug('checking '+i.proj.Name);
+        }
+        clss1.process();
+        system.debug('hasnext: '+clss1.hasNext);
+        
+        clss1.first();
+        clss1.last();
+        clss1.next();
+        clss1.lastRefresh = 'hello Wrld';
+        clss1.previous();
+       System.Debug('hasNext' + String.valueof(clss1.hasNext));
+        System.Debug('hasPrev' + clss1.hasPrevious);
+        System.Debug('pageNumber'+String.valueOf(clss1.pageNumber));
+        clss1.setState('okiedokely');
+        System.Debug('state set to '+clss1.getState());
+        //        clss1.cancel();
+
+        
+        Test.stopTest();
+        
+        system.debug([select name, id from serh_data__c where createddate = today]);
+    }
+         
+}
