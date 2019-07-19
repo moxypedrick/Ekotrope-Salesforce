@@ -1,0 +1,772 @@
+public class SERH {
+  
+	public static Project__C constructProject(projectJSON2Apex.aProjectJSON2Apex aProject, analysisJson2Apex.pAnalysisJson2Apex bsIsAnalysisResults, String HERSrater, Id RFI, String ratingOrganization, String status, String updateStatus) {
+		//Record constructor methods
+        Date EC_Registration_Date = Date.newInstance(1999, 1, 1);
+        Date Rating_Date = Date.newInstance(1999, 1, 1);
+        projectJSON2Apex.aProjectJSON2Apex qProject = aProject;
+        analysisJson2Apex.pAnalysisJson2Apex qAnalyis = bsIsAnalysisResults;
+        
+        integer i = qAnalyis.Compliance.size();
+        integer count = 0;
+        String energyStar = 'Fail';
+        
+        while (count < i){
+            List<string> codesToCheck = new List<string>();
+            If (qAnalyis.Compliance[count].code == 'EnergyStarV3'){
+                if(qAnalyis.Compliance[count].complianceStatus == 'Warn'){
+                    energyStar = 'Pass';
+                } else{
+                    energyStar = qAnalyis.Compliance[count].complianceStatus;
+                      }
+                
+            }
+            count++;
+        }
+        
+       
+        if (qProject.hersRatingDetails.ratingDate != null){
+                EC_Registration_Date =  Date.newInstance(
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(0,4)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(5,7)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(8,10)));
+            }else{
+                EC_Registration_Date = null;
+            }
+            if (qProject.hersRatingDetails.fieldRatingDate != null){
+               Rating_Date = Date.newInstance(
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(0,4)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(5,7)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(8,10)));   
+            }else{
+                Rating_Date = null;
+            }
+      
+        Project__c projectRecord = new Project__c(
+            SERH_Number_of_Units__c = 1,
+            Name = qProject.location.streetAddress.abbreviate(80),
+            Development_Text__c = qProject.community,
+            Builder_SERH__c = qProject.builder,
+            HERS_Rater__c = HERSrater,
+            RemRate_Version__c = 'Ekotrope-' + qProject.algorithmVersion, 
+            Rating_Date__c = Rating_Date,
+            Ekotrope_URL__c = 'https://app.ekotrope.com/#project:'+qProject.id,
+            RESNET_Registry_ID__c = qProject.hersRatingDetails.registryId, 
+            Ekotrope_ID__c = qProject.id,
+            EC_Registration_Date__c =  EC_Registration_Date,
+            Street_Address__c = qProject.location.streetAddress,
+            City__c = qProject.location.city,
+            State__c = qProject.location.state,
+            Zip_Code__c = qProject.location.zip,
+            RecordTypeId = '0120B000000t8JVQAY',
+            OwnerId = '0050B000007wSmS',
+            Ekotrope_selfOrPlanLastSavedAt__c = qProject.selfOrPlanLastSavedAt,
+            Rating_Organization__c = ratingOrganization,
+            Rating_Field_Inspector__c = RFI,
+            Energy_Star_v3__c = energyStar  
+        );
+        
+        if (status == 'SUBMITTED_TO_REGISTRY'){
+            projectRecord.Project_Status__c = 'Completed';
+        } else if(status == 'SUBMITTED_FOR_QA' && updateStatus == 'update status'){
+                projectRecord.Project_Status__c = 'In Progress';
+        } else if(status == 'Error'){
+            projectRecord.Project_Status__c = 'On Hold';
+        } else if (status == 'On Hold' && updateStatus == 'update status'){
+            projectRecord.Project_Status__c = 'On Hold';
+        } else if(status == 'In Progress' && updateStatus == 'update status'){
+            projectRecord.Project_Status__c = 'In Progress';
+        }
+        //projectRecord.SERH_Number_of_Units__c = 1;
+                
+        return projectRecord;
+	}
+    
+    public static SERH_Data__C constructDataRecord(projectJSON2Apex.aProjectJSON2Apex bProject, planJson2Apex.aPlanJson2Apex rplan, analysisJson2Apex.pAnalysisJson2Apex bsIsAnalysisResults,  analysisJson2Apex.pAnalysisJson2Apex RefAnalysisResults,  analysisJson2Apex.pAnalysisJson2Apex DesAnalysisResults, String arecordType) {
+        
+        projectJSON2Apex.aProjectJSON2Apex qProject = bProject;
+        planJson2Apex.aPlanJson2Apex qplan = rplan; 
+        analysisJson2Apex.pAnalysisJson2Apex asIsAnalysisResults = bsIsAnalysisResults; 
+        analysisJson2Apex.pAnalysisJson2Apex referenceAnalysisResults = RefAnalysisResults; 
+        analysisJson2Apex.pAnalysisJson2Apex designAnalysisResults = DesAnalysisResults; 
+        String recordType = arecordType;
+        Date EC_Registration_Date = Date.newInstance(1999, 1, 1);
+        Date Rating_Date = Date.newInstance(1999, 1, 1);
+        string masterPlan = null;    
+              
+        
+        if(arecordType == 'HERS'){
+            masterPlan = qProject.MasterPlanId;           
+        }
+        else{
+            masterPlan = null;
+        }
+        
+        Double naturalGas = 0;
+        Double electric = 0;
+        Double oil = 0;
+        Double propane = 0;
+        Double wood = 0;
+        
+         if (qProject.hersRatingDetails.ratingDate != null){
+                EC_Registration_Date =  Date.newInstance(
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(0,4)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(5,7)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.ratingDate).substring(8,10)));
+            }else{
+                EC_Registration_Date = null;
+            }
+            if (qProject.hersRatingDetails.fieldRatingDate != null){
+               Rating_Date = Date.newInstance(
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(0,4)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(5,7)),
+                    Integer.valueOf(String.valueOf(qProject.hersRatingDetails.fieldRatingDate).substring(8,10)));   
+            }else{
+                Rating_Date = null;
+            }
+        
+       
+        
+        //iterate thru all compliance results
+            //when it equals each one grab it and write it to the appropriate
+            //fields. but how do i iterate throur a 
+            
+        integer i = AsIsAnalysisResults.Compliance.size();
+        integer count = 0;
+        String iecc2009 = 'False';
+        String iecc2012 = 'False';
+        String energyStar = 'False';
+        String doeZERH = 'False';
+        String dukeHero= 'False';
+        
+        while (count < i){
+            List<string> codesToCheck = new List<string>();
+            If (AsIsAnalysisResults.Compliance[count].code == 'IECC2009Performance'){
+                iecc2009 = AsIsAnalysisResults.Compliance[count].complianceStatus;
+            }
+            If (AsIsAnalysisResults.Compliance[count].code == 'EnergyStarV3'){
+                energyStar = AsIsAnalysisResults.Compliance[count].complianceStatus;
+            }
+            If (AsIsAnalysisResults.Compliance[count].code == 'IECC2012Performance'){
+                iecc2012 = AsIsAnalysisResults.Compliance[count].complianceStatus;
+            }
+            If (AsIsAnalysisResults.Compliance[count].code == 'DOEZeroEnergyReady'){
+                doeZERH = AsIsAnalysisResults.Compliance[count].complianceStatus;
+            }
+            If (AsIsAnalysisResults.Compliance[count].code == 'DukeNCHEROPerformance'){
+                dukeHero = AsIsAnalysisResults.Compliance[count].complianceStatus;
+            }
+            count++;
+        }
+        
+         Integer fee = 60;
+        
+        if(qProject.hersRatingDetails.rater.RatingCompany.id == 'JVYyEeYW'){
+            fee = 55;
+        } else if(qProject.hersRatingDetails.ratingType == 'Sampled'){
+			fee = 30;            
+        } else if(qProject.name.containsIgnoreCase('repeat') && energyStar == 'PASS'){//qProject.name.containsIgnoreCase('estar')){
+            fee = 50;
+        } else if(qProject.name.containsIgnoreCase('repeat') && energyStar != 'PASS'){//!qProject.name.containsIgnoreCase('estar')){
+            fee = 45;
+        } else if(!qProject.name.containsIgnoreCase('repeat') && energyStar == 'PASS'){//qProject.name.containsIgnoreCase('estar')){
+            fee = 65;    
+        } else{
+            fee = 60;
+        }
+        
+        //asIsAnalysisResults
+        
+        System.debug(qProject.name+'-'+fee);
+        
+        
+        SERH_Data__c serhRecord = new SERH_Data__c(
+            
+            name = recordType + '-' + qProject.name.abbreviate(79-recordType.length()),
+            Registry_ID__c = qProject.hersRatingDetails.registryId,
+            Rating_Date__c = Rating_Date,          
+            Registered_Date__c = EC_Registration_Date,
+            Upload_Date__c = Date.today(),
+            of_Units__c = 1.0,
+            Project_Type__c = qplan.Details.residenceType,
+            Foundation_Type__c = qplan.thermalEnvelope.foundationType,
+            Housing_Type__c = qplan.Details.residenceType,          
+            
+            ENERGY_STAR_v3__c = energyStar,
+            ZERH__c = doeZERH,
+            IECC2009_UA__c = iecc2009,
+            IECC2012_UA__c = iecc2012,
+            
+            //Rating_Type__c = not sure where this is in api,
+            Software_Version__c = 'Ekotrope-'+qProject.algorithmVersion,
+            //Building_Name__c =
+            Rating_Type__c = qProject.hersRatingDetails.ratingType,  
+            File_Name__c = qProject.name.abbreviate(80),           
+            Plan_Name__c = qProject.model,
+            Ekotrope_Plan_ID__c = masterPlan,
+            HERS_INDEX__c =  AsIsAnalysisResults.hersScore,
+            CFA_sqft__c = qplan.thermalEnvelope.summary.conditionedArea,
+            Volume_cuft__c = qplan.thermalEnvelope.summary.conditionedVolume,
+            BD_Infiltration_Cool__c = qplan.thermalEnvelope.infiltration.cfm50,
+            BD_Infiltration_Heat__c = qplan.thermalEnvelope.infiltration.cfm50,
+            Invoice_for__c = 'File QA', 
+            Fee_per_Unit__c = fee,
+            Export_Type__c = recordType,
+            BD_Infiltration_Units__c = 'cfm50',
+            OwnerId = '0050B000007wSmS',
+            CO2_lbs__c = AsIsAnalysisResults.emissions.summary.totalCo2,
+            NOX_lbs__c = AsIsAnalysisResults.emissions.summary.totalNox,
+            SO2_lbs__c = AsIsAnalysisResults.emissions.summary.totalSo2,
+            Cooling_MMBtu__c = AsIsAnalysisResults.energy.summary.coolingConsumption,
+            Heating_MMBtu__c = AsIsAnalysisResults.energy.summary.heatingConsumption,
+            DHW_MMBtu__c = AsIsAnalysisResults.energy.summary.waterHeatingConsumption, 
+            PV_MMBtu__c = AsIsAnalysisResults.energy.summary.solarGeneration,
+            LA_MMBtu__c = AsIsAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+            Total_Rated_Consumption_MMBtu__c = AsIsAnalysisResults.energy.summary.coolingConsumption + 
+            AsIsAnalysisResults.energy.summary.heatingConsumption +
+            AsIsAnalysisResults.energy.summary.waterHeatingConsumption +
+            AsIsAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+            
+            Electricity_Consumption_kWh__c = 293.07 * (AsIsAnalysisResults.energy.breakdown.byFuel[1].coolingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[1].heatingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[1].lightingAndAppliancesConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[1].waterHeatingConsumption),
+            
+            Fuel_Oil_Consumption_gallons__c = 7.22 * (AsIsAnalysisResults.energy.breakdown.byFuel[2].coolingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[2].heatingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[2].lightingAndAppliancesConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[2].waterHeatingConsumption), 
+            
+            Natural_Gas_Consumption_therms__c = 10 * (AsIsAnalysisResults.energy.breakdown.byFuel[0].coolingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[0].heatingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[0].lightingAndAppliancesConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[0].waterHeatingConsumption),
+            
+            Propane_Consumption_gallons__c = 10.95 *(AsIsAnalysisResults.energy.breakdown.byFuel[3].coolingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[3].heatingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[3].lightingAndAppliancesConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[3].waterHeatingConsumption),
+            
+            Wood_Consumption_tonnes__c = 0.067 * (AsIsAnalysisResults.energy.breakdown.byFuel[4].coolingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[4].heatingConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[4].lightingAndAppliancesConsumption+
+            AsIsAnalysisResults.energy.breakdown.byFuel[4].waterHeatingConsumption),
+            
+          
+            Ref_CO2_Lbs__c = referenceAnalysisResults.emissions.summary.totalCo2,
+            Ref_NOX_lbs__C = referenceAnalysisResults.emissions.summary.totalNox,
+            Ref_SO2_lbs__C = referenceAnalysisResults.emissions.summary.totalSo2,
+            
+            Ref_Cooling_MMBtu__c = referenceAnalysisResults.energy.summary.coolingConsumption,
+            Ref_Heating_MMBtu__c = referenceAnalysisResults.energy.summary.heatingConsumption,
+            Ref_DHW_MMBtu__c = referenceAnalysisResults.energy.summary.waterHeatingConsumption, 
+            Ref_PV_MMBtu__c = referenceAnalysisResults.energy.summary.solarGeneration,
+            Ref_LA_MMBtu__c = referenceAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+            Ref_Total_Rated_Consumption_MMBtu__c = referenceAnalysisResults.energy.summary.coolingConsumption + 
+            referenceAnalysisResults.energy.summary.heatingConsumption +
+            referenceAnalysisResults.energy.summary.waterHeatingConsumption +
+            referenceAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+           
+            Ref_Electricity_Consumption_kWh__c = 293.07 * (referenceAnalysisResults.energy.breakdown.byFuel[1].coolingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[1].heatingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[1].lightingAndAppliancesConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[1].waterHeatingConsumption),
+            
+            Ref_Fuel_Oil_Consumption_gallons__c = 7.22 * (referenceAnalysisResults.energy.breakdown.byFuel[2].coolingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[2].heatingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[2].lightingAndAppliancesConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[2].waterHeatingConsumption), 
+            
+            Ref_Natural_Gas_Consumption_therm__c = 10 * (referenceAnalysisResults.energy.breakdown.byFuel[0].coolingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[0].heatingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[0].lightingAndAppliancesConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[0].waterHeatingConsumption),
+            
+            Ref_Propane_Consumption_gallons__c = 10.95 *(referenceAnalysisResults.energy.breakdown.byFuel[3].coolingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[3].heatingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[3].lightingAndAppliancesConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[3].waterHeatingConsumption),
+            
+            Ref_Wood_Consumption_tonnes__c = 0.067 * (referenceAnalysisResults.energy.breakdown.byFuel[4].coolingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[4].heatingConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[4].lightingAndAppliancesConsumption+
+            referenceAnalysisResults.energy.breakdown.byFuel[4].waterHeatingConsumption), 
+              
+            Design_CO2_Lbs__c = designAnalysisResults.emissions.summary.totalCo2,
+            Design_NOX_lbs__C = designAnalysisResults.emissions.summary.totalNox,
+            Design_SO2_lbs__C = designAnalysisResults.emissions.summary.totalSo2,
+            
+            Design_Cooling_MMBtu__c = designAnalysisResults.energy.summary.coolingConsumption,
+            Design_Heating_MMBtu__c = designAnalysisResults.energy.summary.heatingConsumption,
+            Design_DHW_MMBtu__c = designAnalysisResults.energy.summary.waterHeatingConsumption, 
+            Design_PV_MMBtu__c = designAnalysisResults.energy.summary.solarGeneration,
+            Design_LA_MMBtu__c = designAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+            Design_Total_Rated_Consumption_MMBtu__c = designAnalysisResults.energy.summary.coolingConsumption + 
+            designAnalysisResults.energy.summary.heatingConsumption +
+            designAnalysisResults.energy.summary.waterHeatingConsumption +
+            designAnalysisResults.energy.summary.lightingAndAppliancesConsumption,
+                      
+            Design_Electricity_Consumption_kWh__c = 293.07 * (designAnalysisResults.energy.breakdown.byFuel[1].coolingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[1].heatingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[1].lightingAndAppliancesConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[1].waterHeatingConsumption),
+            
+            Design_Fuel_Oil_Consumption_gallons__c = 7.22 * (designAnalysisResults.energy.breakdown.byFuel[2].coolingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[2].heatingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[2].lightingAndAppliancesConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[2].waterHeatingConsumption), 
+            
+            Design_Natural_Gas_Consumption_therm__c = 10 * (designAnalysisResults.energy.breakdown.byFuel[0].coolingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[0].heatingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[0].lightingAndAppliancesConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[0].waterHeatingConsumption),
+            
+            Design_Propane_Consumption_gallons__c = 10.95 *(designAnalysisResults.energy.breakdown.byFuel[3].coolingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[3].heatingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[3].lightingAndAppliancesConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[3].waterHeatingConsumption),
+            
+            Design_Wood_Consumption_tonnes__c = 0.067 * (designAnalysisResults.energy.breakdown.byFuel[4].coolingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[4].heatingConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[4].lightingAndAppliancesConsumption+
+            designAnalysisResults.energy.breakdown.byFuel[4].waterHeatingConsumption)
+        );
+        return serhRecord;
+    }
+    
+    public static Inspections__c constructInspectionRecord(ID projectID) {
+        Project__c projectRecord;
+        projectRecord = [SELECT HERS_Rater__c, Project_Status__c, Name, EC_Registration_Date__c, Energy_STAR_v3__c FROM Project__c WHERE ID = :projectID];
+        projectRecord.Project_Status__c = 'Pending Review';
+        update projectRecord;
+        string year;
+        if(projectRecord.EC_Registration_Date__c != null){
+            year = String.valueOf(projectRecord.EC_Registration_Date__c.year()); //
+        } else {
+            year = String.valueOf(datetime.now().year());
+        }
+        
+        boolean estar = false;
+
+        if(projectRecord.Energy_Star_v3__c == 'Pass' || projectRecord.Energy_Star_v3__c == 'Certified'){
+            estar = true;
+        }
+        Inspections__c inspectionRecord = new Inspections__c(
+            Project__c = projectID,
+            Project_Temporary_Name__c = projectRecord.Name,
+            QA_Year_SERH__c = year,
+            HERS_Rater_Name_SERH__c = projectRecord.HERS_Rater__c,
+            Status__c = 'New',
+            Energy_STAR__c = estar,
+            RecordTypeId = '0120B0000005kLZQAY'
+        );
+               
+        return inspectionRecord;
+	}
+    
+    public static Inspections__c constructAutoQaRecord(ID projectID) {
+        Project__c projectRecord;
+        list<Inspections__c> inspectionRecordList;
+        projectRecord = [SELECT HERS_Rater__c, Name, EC_Registration_Date__c, Energy_STAR_v3__c FROM Project__c WHERE ID = :projectID];
+       
+        inspectionRecordList = [SELECT Project_Temporary_Name__c, Status__c FROM Inspections__c WHERE RecordTypeId = '0125C000000gF05QAE' and Project__c = :projectID];
+        // return a list that is an empty???
+        Inspections__c inspectionRecord;
+        if(inspectionRecordList.size() == 0){
+            
+            //create an inspection
+            inspectionRecord = null;
+            string year;
+            if(projectRecord.EC_Registration_Date__c != null){
+                year = String.valueOf(projectRecord.EC_Registration_Date__c.year()); //
+            } else {
+                year = String.valueOf(datetime.now().year());
+            }
+            boolean estar = false;  
+            if(projectRecord.Energy_Star_v3__c == 'Pass' || projectRecord.Energy_Star_v3__c == 'Certified'){
+                estar = true;
+            }
+            
+            inspectionRecord = new Inspections__c(
+                Project__c = projectID,
+                Project_Temporary_Name__c = projectRecord.Name,
+                QA_Year_SERH__c = year,
+                HERS_Rater_Name_SERH__c = projectRecord.HERS_Rater__c,
+                Status__c = 'Ready for Review',
+                Energy_STAR__c = estar,
+                RecordTypeId = '0125C000000gF05QAE',
+                Date_of_Inspection__c = date.today()
+            );
+                   
+            
+        }else{
+            inspectionRecord = inspectionRecordList[0];
+        }
+        
+      return inspectionRecord;
+
+	}
+    
+    public static string setProjectStatus(projectJSON2Apex.aProjectJSON2Apex bProject, planJson2Apex.aPlanJson2Apex rplan, String updateStatus, String initialStatus){
+        //Set project status, assigns the appropriate status dependent on
+    	//the rating type, building type, and previous status
+        projectJSON2Apex.aProjectJSON2Apex qProject = bProject;
+        planJson2Apex.aPlanJson2Apex qplan = rPlan; 
+        string projectStatus;
+       
+        string projectType = rPlan.Details.residenceType;
+        string ratingType = bProject.hersRatingDetails.ratingType;
+        if(projectType == 'ApartmentEndUnit' || projectType == 'ApartmentInsideUnit'
+           || projectType == 'MultiFamilyWholeBuilding' || projectType == 'DuplexSingleUnit'
+           || projectType == 'DuplexWholeBuilding'|| ratingType == 'Sampled'
+           || ratingType == 'Threshold'|| ratingType == 'Projected'){
+               projectStatus = 'On Hold';
+           }
+        else{
+            projectStatus = 'In Progress';
+        }
+        
+        return projectStatus;
+    }
+        
+    public static void determineQaNeed(List<id> projectIds){
+        //This takes a list of project IDs and determines if any should
+    	//be selected for File QA. This is based on need.
+        // This determines the files that need File QA. 
+        
+        String year;
+        year = String.valueOf(datetime.now().year());
+        
+        Map<id, boolean> idMap = new Map<id, boolean>();
+             for(Qualifications_del__c autoUploadStatus : [Select Approved_for_Auto_Upload__c, id, Qualifications_for__c
+                                            From Qualifications_del__c
+                                            ])
+            {idMap.put(autoUploadStatus.Qualifications_for__c, autoUploadStatus.Approved_for_Auto_Upload__c);}
+ 
+        
+        //iterate thru list       
+        for(id projectId : projectIds){        
+            //get project with soql
+             Project__c projectRecord;
+             projectRecord = [SELECT HERS_Rater__c, Rating_Field_Inspector__c,
+                              Project_Status__c, ID, Energy_STAR_v3__c,
+                              Ekotrope_ID__c, Name
+                              FROM Project__c WHERE ID = :projectId];
+             id hersRater = projectRecord.HERS_Rater__c;
+             
+            
+            system.debug(projectRecord.Name);
+            
+            
+            
+            //determine if the project is estar: if true then preform separate coin flip.
+            if(projectRecord.Energy_Star_v3__c == 'Pass'){
+                Integer eStarFiles =  [select count()
+                                     from project__c
+                                     Where HERS_Rater__c = :hersRater and ((EC_Registration_Date__c = THIS_YEAR
+                                                                                     and Energy_Star_v3__c = 'Pass'
+                                                                                     and recordtypeid = '0120B000000t8JVQAY')
+                                     
+                                     or (recordtypeid = '0120B000000t8JVQAY' 
+                                         and Energy_Star_v3__c = 'Pass'
+                                         and Project_Status__c = 'pending review'
+                                         and EC_Registration_Date__c = Null)
+                                     
+                                     or (recordtypeid = '0120B000000t8JVQAY' 
+                                         and Energy_Star_v3__c = 'Pass'
+                                         and Project_Status__c = 'in progress'
+                                         and EC_Registration_Date__c = Null))
+                                    ];
+               
+                Integer eStarFileQA = [select count()
+                                                   from inspections__c
+                                                   Where QA_Year_SERH__c = :year
+                                                   and Energy_Star__c = TRUE
+                                                   and recordTypeID = '0120B0000005kLZQAY'
+                                                   and HERS_Rater_Name_SERH__c = :hersRater];
+                Double TotaleStarQaNeed = Math.ceil(double.valueOf(eStarFiles)/10);
+                
+                if(eStarFileQA == 0){
+                    Inspections__c newInspection = serhRecordConstructor.constructInspectionRecord(projectRecord.Id);
+                    insert newInspection;
+                } else if(math.random() > 0.5) {
+                    //flip coin
+                    System.debug('First Coin Flip was greater than 0.5');
+                	Double eStarFileQaLeft = TotaleStarQaNeed - eStarFileQa;
+                    //if eStarFileQaLeft > 0 == TRUE then we can create a QA
+                    if(eStarFileQaLeft >= 0){
+                        Inspections__c newInspection = serhRecordConstructor.constructInspectionRecord(projectRecord.Id);
+                        insert newInspection;
+                        projectRecord.Project_Status__c = 'Pending Review';
+                        update projectRecord;
+                    }
+                }
+            } 
+            
+            Integer regFiles =  [select count()
+                                       from project__c
+                                       Where HERS_Rater__c = :hersRater 
+                                       and 
+                                             ((EC_Registration_Date__c = THIS_YEAR
+                                               and recordtypeid = '0120B000000t8JVQAY')
+                                              
+                                           or (recordtypeid = '0120B000000t8JVQAY'
+                                                and Project_Status__c = 'pending review'
+                                                and EC_Registration_Date__c = Null)
+                                                                             
+                                            or (recordtypeid = '0120B000000t8JVQAY' 
+                                                and Project_Status__c = 'in progress'
+                                                and EC_Registration_Date__c = Null))
+                                      ];  
+            
+            Integer regFileQA = [select count()
+                                              from inspections__c
+                                              Where QA_Year_SERH__c = :year// year = String.valueOf(datetime.now().year());
+                                              and recordTypeID = '0120B0000005kLZQAY'
+                                              and HERS_Rater_Name_SERH__c = :hersRater]; 
+                       
+            if(regFileQA == 0){
+                Inspections__c newInspection = serhRecordConstructor.constructInspectionRecord(projectRecord.Id);
+                insert newInspection;
+                projectRecord.Project_Status__c = 'Pending Review';
+            } else if(math.random() < 0.5)
+            {
+                //This file was not needed for estar or regular file qa: upload to building registry
+                //Make sure they have the auto-upload field activated
+                system.debug(idMap.get(projectRecord.HERS_Rater__c));
+                system.debug(idMap.get(projectRecord.Rating_Field_Inspector__c));
+                boolean rater;
+                boolean rfi;
+                if(idMap.get(projectRecord.HERS_Rater__c) == null){
+                    rater = false;
+                } else{
+                    rater = idMap.get(projectRecord.HERS_Rater__c);
+                }
+                
+                if(idMap.get(projectRecord.Rating_Field_Inspector__c) == null){
+                    rfi = false;
+                } else{
+                    rfi = idMap.get(projectRecord.Rating_Field_Inspector__c);
+                }
+                if(rater && rfi){
+                    projectRecord.Project_Status__c = 'In Progress'; 
+                    update projectRecord;
+                }
+                else{
+                    //Not approved for autoProcess 
+                    //place the project on hold
+                    //Will know that the project is 'On Hold' due to not approved for autoProcess
+                    //when we write the wrapper class that queries the rater/rfi credential
+                    projectRecord.Project_Status__c = 'On Hold';
+                    update projectRecord;
+                    
+                } 
+            } 
+            else{
+                system.debug('Second coin flip was greater than 0.5');
+                //This file was randomly selected for regular file qa: determine if they need QA
+                Double TotalFileQaNeed = Math.ceil(double.valueOf(regFiles)/10);
+                Double regFileQaLeft = TotalFileQaNeed - regFileQa;
+                if(regFileQaLeft >= 0){
+                    Inspections__c newInspection = serhRecordConstructor.constructInspectionRecord(projectRecord.Id);
+                    insert newInspection;
+                    projectRecord.Project_Status__c = 'Pending Review';
+                }
+            }
+        }
+    } 
+	    
+    public static void uploadToBuildingRegistry(){
+        //This uploads all projects that have status of "In Progress"
+    	//to the building registry. If the project has an error
+    	//it will change the project status and add inspection record
+            List<Project__c> uploadList = new List<Project__c>();
+            for(Project__c existingProject : [Select Ekotrope_ID__c, Ekotrope_selfOrPlanLastSavedAt__c
+                                              FROM Project__c
+                                              WHERE Ekotrope_ID__c != null 
+                                              and RecordTypeId='0120B000000t8JVQAY'
+                                              and Project_Status__c = 'In Progress'])
+            {uploadList.add(existingProject);}  
+            
+            String username = 'southface-api';
+            String password = 'wYFUCL5z';
+            Blob headerValue = Blob.valueOf(username + ':' + password);
+            String authorization = ('Basic ' + EncodingUtil.base64Encode(headerValue));
+            Date uploadDate = Date.today();
+            System.debug(uploadList);
+            for(project__c currentProj : uploadList){
+                if(Test.isRunningTest()) {
+                    Test.setMock(HttpCalloutMock.class, new YourHttpPutCalloutMockImpl());
+                    System.Debug('Setting test mock YourHttpPutCalloutMockImpl');
+                }
+                system.debug(currentProj.Ekotrope_ID__c);
+                HttpResponse uploadResponse = SERH.putToBuildingRegistry(authorization, currentProj.Ekotrope_ID__c);
+                String plan = String.valueOf(uploadResponse.getBody());
+                uploadResponseJSON2Apex upload = uploadResponseJSON2Apex.parse(plan);
+                system.debug(uploadResponse);
+                system.debug(uploadResponse.getStatusCode());
+                system.debug(upload);
+                if(uploadResponse.getStatusCode() != 418){
+                    if(upload.registryID != null){
+                        currentProj.RESNET_Registry_ID__c = upload.registryId;
+                        currentProj.EC_Registration_Date__c = uploadDate;
+                        currentProj.Project_Status__c = 'Completed'; 
+                    }
+                    else{
+                        //If actual error, make inspection record.         
+                        // Write rawRegistryResponse and errorMessage to notes field of autoQaRecord
+                        // automaticQaStatus = Fail, Warn, NotChecked, Pass
+                        system.debug('here');
+                        system.debug(uploadResponse.getStatusCode());
+                        Inspections__c inspectionRecord = SERH.constructAutoQaRecord(currentProj.id);//, True, False, False
+                        inspectionRecord.Building_Registry_Upload_Error__c = TRUE;
+                        inspectionRecord.SERH_Notes_SERH__c = upload.rawRegistryResponse;
+                        
+                        if(upload.automaticQaStatus == 'Fail' || upload.automaticQaStatus == 'NotChecked'){//or upload.automaticQaStatus == 'Warn'
+                            inspectionRecord.Ekotrope_QA_Error__c = TRUE;
+                            //need to add errorMessage to uploadResponseJSON2Apex so 
+                            //we can write those notes to the inspection record
+                        }
+                        currentProj.Project_Status__c = 'On Hold';
+                        update currentProj;
+                        insert inspectionRecord;
+                    }            
+                }
+                else{
+                    //If tea pot error, just put it off again = status = In Progress
+                    currentProj.Project_Status__c = 'In Progress';
+                }   
+                //update currentProj;
+            } 
+            update(uploadList);       
+    }
+    	
+    public static HttpResponse getProjectList(String authorization, String statusType){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();      
+        request.setEndpoint('https://app.ekotrope.com/api/v1/projects?status='+statusType);//SUBMITTED_TO_REGISTRY');
+        request.setMethod('GET');
+        request.setHeader('authorization', authorization);
+        HttpResponse response = http.send(request);
+        return response;
+   	}
+    
+    public static HttpResponse getProjectListWithDate(String authorization, String statusType, String createdAfter, String createdBefore){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();      
+        request.setEndpoint('https://app.ekotrope.com/api/v1/projects?status='+statusType+'&created_after='+createdAfter+'&created_before='+createdBefore);
+        request.setMethod('GET');
+        request.setHeader('authorization', authorization);
+        HttpResponse response = http.send(request);
+        return response;
+   	}
+     
+    public static HttpResponse getProject(String authorization, String ekotropeId){
+        String project = ekotropeId;
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+		request.setEndpoint('https://app.ekotrope.com/api/v1/projects/'+project);
+		request.setMethod('GET');
+		request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');     
+		HttpResponse projectResponse = http.send(request); 
+        return projectResponse;
+            
+    }
+    
+    public static HttpResponse getHousePlan(String authorization, String ekotropeMasterPlanId){
+        String planID = ekotropeMasterPlanId;
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+		request.setEndpoint('https://app.ekotrope.com/api/v1/houseplans/' + planID);
+		request.setMethod('GET');
+        request.setHeader('authorization', authorization);
+		HttpResponse planResponse = http.send(request); 
+        return planResponse;
+               
+    }
+    
+    public static HttpResponse getHousePlanAnalysis(String authorization, String ekotropeMasterPlanId, String buildingType, List<String> codesToCheck){
+        String planID = ekotropeMasterPlanId;
+        String building = buildingType;
+        String codesString = '';
+        for(String i : codesToCheck){
+            codesString = codesString +'&codesToCheck=' + i;
+        }
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://app.ekotrope.com/api/v1/planAnalysis/'+planID+'?buildingType='+ buildingType + codesString);
+		request.setMethod('GET');
+		request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');
+		HttpResponse planAnalysisResponse = http.send(request); 
+        return planAnalysisResponse;
+               
+    }  
+    
+    public static HttpResponse putToBuildingRegistry(String authorization, String ekotropeId){
+        //make this a method which returns a Map<String, String>
+        //This method should take an authorization and a list of project ids or ekotrope ids
+        //It then uploads each individually and returns a status or does it handle the status internally
+        //I think it handles the status internally and then it can just be a terminal function
+        //Otherwise it takes one id at a time uploads and returns the response. That's pretty clean
+        //
+        //
+        String planID = ekotropeId;
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        HttpResponse putResponse;
+        request.setEndpoint('https://api.ekotrope.com/api/v1/resnet/registeredProjects/'+planID);
+        request.setMethod('PUT');
+        request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');
+        request.setTimeout(20000);
+        try{
+            putResponse = http.send(request); 
+            //return putResponse;
+        } catch(System.CalloutException e){
+            putResponse = new HttpResponse();
+            putResponse.setStatus('Coffee is ready!');
+            putResponse.setStatusCode(418);
+            system.debug(putResponse);
+			//return putResponse;
+        }      
+        return putResponse;
+    }  
+    
+    public static List<List<String>> getProjectUpdateList(String authorization, String status){
+        
+        Map<String, String> projectMap = new Map<String, String>();
+        List <List<String>> newList = new List<List<String>>();
+        
+        List<String> idSet = new List<String>();
+    	
+        for(Project__c existingProject : [Select Ekotrope_ID__c, Ekotrope_selfOrPlanLastSavedAt__c
+                                          FROM Project__c
+                                         Where recordtypeid = '0120B000000t8JVQAY' and Ekotrope_ID__c!= null]){
+            projectMap.put(existingProject.Ekotrope_ID__c, existingProject.Ekotrope_selfOrPlanLastSavedAt__c);
+                                         }
+        String newProjectsList = String.valueOf(EkotropeAPIconnector_DP.getprojectList(authorization, status).getBody());
+        
+        List<projectListJSON2Apex> newProjects = projectListJSON2Apex.parse(newProjectsList);
+        List<Object> newResults = (List<Object>)JSON.deserializeUntyped(newProjectsList);
+        
+        for(Object project : newResults){
+            Map<String,Object> data = (Map<String,Object>)project;
+            List <String> subList = new List<String>();
+    		if (projectMap.get(String.valueOf(data.get('id'))) == null) {
+                subList.add(String.valueOf(data.get('id')));
+                subList.add('update status');
+                subList.add('status');
+                newList.add(subList);        		
+            } else  {
+        		if(data.get('selfOrPlanLastSavedAt') != projectMap.get(String.valueOf(data.get('id')))){
+            		subList.add(String.valueOf(data.get('id')));
+                	subList.add('no status update');
+                    subList.add('status');
+                    newList.add(subList);   
+                }
+            }
+        }
+        return newList;
+    }   
+
+}
