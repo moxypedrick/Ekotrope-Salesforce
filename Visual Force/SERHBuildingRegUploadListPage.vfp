@@ -1,0 +1,103 @@
+<apex:page controller="SERHBuildingRegUploadList" lightningStylesheets="true">
+    <apex:includeLightning />
+
+    <apex:slds >
+            <style>
+                .ct{
+                text-align:center;
+                }
+
+
+            </style>
+
+            <style>
+                .spinnerBg{
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    background-color: #000;
+                    opacity: 0.2;
+                    z-index: 999999;
+                }
+                .spinner{
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    background-image: url("/img/loading32.gif");
+                    background-size: 16px;
+                    background-repeat: no-repeat;
+                    background-attachment: fixed;
+                    background-position: center;
+                    z-index: 9999999;
+                    opacity: 1;
+                }
+            </style>
+
+        <script>
+            $Lightning.use("c:lcvf", function() {
+              $Lightning.createComponent("lightning:spinner",
+              { "alternativeText":"Loading", size="small", "aura:id":"lightning"},
+              function(cmp) {
+                // do some stuff
+              });
+            });
+        </script>
+
+        <apex:form >
+                <apex:actionStatus id="spinnerStatus">
+                    <apex:facet name="start">
+                        <div class="spinnerBg" />
+                        <div class="spinner" />
+                    </apex:facet>
+                </apex:actionStatus>
+                <apex:pageBlock id="bigGroup">
+                     <apex:pageMessages />
+
+                        <apex:pageBlockButtons location="top"  style="text-align: center" >
+                            <apex:commandButton action="{!process}" value="Upload to Registry" reRender="bigGroup" status="spinnerStatus" />
+                            <apex:commandButton value="Refresh" oncomplete="location.reload()" />
+                            <apex:commandButton action="{!syncWithEkotrope}" value="Sync with Ekotrope" reRender="bigGroup" status="spinnerStatus" />
+                            <p style="align: center">Last Synced with Ekotrope - {!lastRefresh}</p>
+                        </apex:pageBlockButtons>
+
+                        <div id="lightning" />
+
+
+
+                        <!-- In our table we are displaying the cContact records -->
+                        <apex:pageBlockTable value="{!contacts}" var="c" id="table">
+                            <!-- This is how we access the contact values within our cContact container/wrapper -->
+                            <apex:column value="{!c.Name}" width="40%" />
+                            <apex:column headerclass="ct" value="{!c.TotalFileQaLeft}" headerValue="File QA Left" width="15%" style="text-align: center" />
+                            <!--<apex:column headerclass="ct" value="{!c.TotalFieldQaLeft}" headerValue="Field QA Left" width="15%" style="text-align: center"  />-->
+                            <apex:column headerclass="ct" value="{!c.ESTARfileQaLeft}" headerValue="ESTAR File QA Left" width="15%" style="text-align: center"  />
+                            <!--<apex:column headerclass="ct" value="{!c.ESTARfieldQaLeft}" headerValue="ESTAR Field QA Left" width="15%" style="text-align: center"  /> -->
+                        </apex:pageBlockTable>
+        <div id="lightning" />
+        <div id="lightning" />
+        <apex:pageBlockSection >
+
+        </apex:pageBlockSection>
+                        <apex:pageBlockTable value="{!projects}" var="c" id="theTable">
+                              <apex:column width="1%" headerClass="slds-cell-fixed">
+                                    <apex:inputCheckbox value="{!c.checked}" />
+                              </apex:column>
+                              <apex:column value="{!c.creaxDate}" headerValue="Created Date" width="20%"   />
+                              <apex:column headerValue="Name" width="20%" >
+                                    <a href="https://southface.my.salesforce.com/{!c.proj.Id}" target="_blank" >{!c.proj.Name}</a>
+                              </apex:column>
+
+                              <apex:column value="{!c.proj.hers_rater__r.Name}" headerValue="Hers Rater" width="10%"  />
+                              <apex:column value="{!c.proj.rating_field_inspector__r.Name}" headerValue="Field Inspector" width="10%" />
+                             <!-- <apex:column headerClass="ct" value="{!c.QAleft}" headerValue="File QA Left" width="5%" style="text-align: center" />  -->
+                              <apex:column headerClass="ct" value="{!c.RatingType}" headerValue="Rating Type" width="5%" style="text-align: center" />
+                              <apex:column headerClass="ct" value="{!c.ESv3Status}" headerValue="EnergyStar" width="5%" style="text-align: center" />
+                              <apex:column headerClass="ct" value="{!c.feePerUnit}" headerValue="Upload Fee" width="5%" style="text-align: center" />
+                              <apex:column headerClass="ct" headerValue="Ekotrope Link" width="18%" >
+                                    <a href="https://app.ekotrope.com/#project:{!c.proj.Ekotrope_ID__c}" target="_blank" >{!c.proj.Ekotrope_ID__c}</a>
+                              </apex:column>
+                        </apex:pageBlockTable>
+            </apex:pageBlock>
+        </apex:form>
+    </apex:slds>
+</apex:page>

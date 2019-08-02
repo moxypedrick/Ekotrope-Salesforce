@@ -1,0 +1,84 @@
+<apex:page controller="serhQaAssignment" lightningStylesheets="true">
+    <apex:includeLightning />
+    <apex:slds >
+            <style>
+                .ct{
+                text-align:center;
+                }
+
+
+            </style>
+
+            <style>
+                .spinnerBg{
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    background-color: #000;
+                    opacity: 0.2;
+                    z-index: 999999;
+                }
+                .spinner{
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    background-image: url("/img/loading32.gif");
+                    background-size: 16px;
+                    background-repeat: no-repeat;
+                    background-attachment: fixed;
+                    background-position: center;
+                    z-index: 9999999;
+                    opacity: 1;
+                }
+            </style>
+
+        <script>
+            $Lightning.use("c:lcvf", function() {
+              $Lightning.createComponent("lightning:spinner",
+              { "alternativeText":"Loading", size="small", "aura:id":"lightning"},
+              function(cmp) {
+                // do some stuff
+              });
+            });
+        </script>
+    <apex:form >
+         <apex:actionStatus id="spinnerStatus">
+                <apex:facet name="start">
+                    <div class="spinnerBg" />
+                    <div class="spinner" />
+                </apex:facet>
+            </apex:actionStatus>
+        <apex:pageBlock >
+           <div align="left" draggable="false" >
+               <apex:pageBlockButtons location="top">
+                   <div align="left" draggable="false" >
+                       <apex:commandButton action="{!assign}" value="Assign QA Task" oncomplete="location.reload()" />
+                       <apex:selectList label="Assign QA to:" value="{!Technicians}" multiselect="false" size="1">
+                           <apex:selectOptions value="{!items}" />
+                       </apex:selectList>
+                       <apex:commandButton action="{!syncWithEkotrope}" value="Sync with Ekotrope" reRender="bigGroup" status="spinnerStatus" />
+                       <p style="align: center">Last Synced with Ekotrope - {!lastRefresh}</p>
+                    </div>
+               </apex:pageBlockButtons>
+            </div>
+            <apex:pageBlockTable value="{!Inspections}" var="c" id="table">
+                <apex:column width="1%" headerClass="slds-cell-fixed">
+                    <apex:inputCheckbox value="{!c.checked}" />
+                </apex:column>
+                <apex:column value="{!c.Ready_for_Review}" headerValue="Ready Date" width="20%"   />
+                <apex:column headerValue="QA File" width="20%" >
+                    <a href="https://southface.my.salesforce.com/{!c.inspectionID}" target="_blank" >{!c.project}</a>
+                </apex:column>
+                <!--<apex:column headerclass="ct" value="{!c.inspStatus}" headerValue="Inspection Status" width="5%" style="text-align: center" />-->
+                <apex:column headerclass="ct" value="{!c.HERS_Rater}" headerValue="HERS Rater" width="15%" style="text-align: center"  />
+
+                <apex:column headerclass="ct" value="{!c.ESv3Status}" headerValue="ENERGYSTAR" width="5%" style="text-align: center"  />
+                <!--<apex:column headerclass="ct" headerValue="Ekotrope Link" width="15%" style="text-align: center" >
+                    <a href="https://app.ekotrope.com/#project:{!c.ekoId}" target="_blank" >{!c.ekoId}</a>
+                </apex:column>-->
+            </apex:pageBlockTable>
+         </apex:pageBlock>
+
+    </apex:form>
+    </apex:slds>
+</apex:page>

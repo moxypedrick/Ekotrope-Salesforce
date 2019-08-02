@@ -1,24 +1,39 @@
 global class serhSchedulable implements Schedulable{
     global void execute(SchedulableContext sc){
+
+        String username = '';
+    	String password = '';
+        //Encrypt the Username and password:
+        Blob headerValue = Blob.valueOf(username + ':' + password);
+        String authorization = ('Basic ' + EncodingUtil.base64Encode(headerValue));
+
+
         list<string> codes = new list<string>();
         codes.add('EnergyStarV3');
     	codes.add('IECC2009Performance');
     	codes.add('IECC2012Performance');
     	codes.add('DOEZeroEnergyReady');
     	codes.add('DukeNCHEROPerformance');
-        
-        SERHprojectRegistryUpdater updateNewProjects = new SERHprojectRegistryUpdater();
+
+        SERH updateNewProjects = new SERH();
+        updateNewProjects.setAuthorization(authorization);
         updateNewProjects.setCodesToCheck(codes);
         updateNewProjects.setVariables('SUBMITTED_FOR_QA');
         updateNewProjects.setSERHDataName('HERS');
         updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
-        
-        SERHprojectRegistryUpdater updateRegisteredProjects = new SERHprojectRegistryUpdater();
+
+        SERH updateRegisteredProjects = new SERH();
+        updateRegisteredProjects.setAuthorization(authorization);
         updateRegisteredProjects.setCodesToCheck(codes);
         updateRegisteredProjects.setVariables('SUBMITTED_TO_REGISTRY');
         updateRegisteredProjects.setSERHDataName('HERS');
         updateRegisteredProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id submittedProjectBatchId = Database.executeBatch(updateRegisteredProjects,15);
+
+        SERH_uploadToBuildingRegistry uploadProjects = new SERH_uploadToBuildingRegistry();
+        uploadProjects.setAuthorization(authorization);
+        Id uploadProjectBatchId = Database.executeBatch(uploadProjects, 2);
+
     }
 }

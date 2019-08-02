@@ -1,0 +1,69 @@
+<apex:page controller="serhQaReportWrapperClass" lightningStylesheets="true">
+    <style>
+        .ct{
+        text-align:center;
+        word-wrap: break-word;
+        white-space: normal;
+        table-layout:fixed;
+        }
+
+        .ct-color-1{
+        text-align:center;
+        background-color: #8ECB95;
+        white-space: normal;
+        table-layout:fixed;
+        }
+
+        .ct-color-2{
+        text-align:center;
+        background-color: #D1F0B1;
+        white-space: normal;
+        table-layout:fixed;
+        }
+
+                .ct-color-3{
+        text-align:center;
+        background-color: #FFEE93;
+        }
+
+        .ct-color-4{
+        text-align:center;
+        background-color: #D1F0B1;
+        }
+    </style>
+        <apex:form styleclass="ct">
+            <apex:selectList value="{!year}" multiselect="false" size="1" required="false" >
+                <apex:selectOption itemLabel="2019" itemValue="2019"/>
+                <apex:selectOption itemLabel="2018" itemValue="2018"/>
+                <apex:selectOption itemLabel="2017" itemValue="2017"/>
+                <apex:selectOption itemLabel="2016" itemValue="2016"/>
+                <apex:selectOption itemLabel="2015" itemValue="2015"/>
+                <apex:actionSupport event="onchange" reRender="qaTable"/>
+            </apex:selectList>
+        </apex:form>
+        <apex:pageBlock id="qaTable" >
+            <apex:pageBlockTable value="{!contacts}" var="c" id="table" columnsWidth="20%,10%,10%,10%,10%,10%,10%,10%,10%">
+                <apex:column value="{!c.Name}" width="20%" />
+                <apex:column headerclass="ct" value="{!c.TotalFiles}" headerValue="# Files" width="10%" styleclass="ct-color-2" />
+                <apex:column headerclass="ct" value="{!c.TotalFileQaComplete}" headerValue="# File QA Created" width="10%" styleclass="ct-color-2"/>
+                <apex:column headerclass="ct" value="{!c.TotalFileQaLeft}" headerValue="# File QA Left" width="10%" styleclass="{!if(c.TotalFileQaLeft>0,'ct-color-3', 'ct-color-4')}"/>
+
+
+                <apex:column headerclass="ct" value="{!c.ESTARfileQaLeft}" headerValue="# ESTAR QA LEFT" width="10%" styleclass="{!if(c.ESTARfileQaLeft>0,'ct-color-3', 'ct-color-4')}" />
+
+                <apex:column headerclass="ct" value="{!c.TotalFieldQaLeft}" headerValue="Field QA Left" width="10%" styleclass="{!if(c.TotalFieldQaLeft>0,'ct-color-3', 'ct-color-4')}" />
+
+                <apex:column headerclass="ct" value="{!c.ESTARfieldQaLeft}" headerValue="ESTAR Field QA Left" width="10%" styleclass="{!if(c.ESTARfieldQaLeft>0,'ct-color-3', 'ct-color-4')}"  />
+
+                <apex:column headerclass="ct" value="{!c.ESTARfileQaComplete}" headerValue="# ESTAR QA" width="10%" styleclass="ct-color-1" />
+                <apex:column headerclass="ct" value="{!c.ESTARfiles}" headerValue="# ESTAR Files" width="10%" styleclass="ct-color-1" />
+                <apex:column headerclass="ct" value="{!c.TotalFields}" headerValue="# Field Ratings" width="10%" styleclass="ct-color-2" />
+                <apex:column headerclass="ct" value="{!c.TotalFieldQaComplete}" headerValue="# Field QA Created" width="10%" styleclass="ct-color-2" />
+                <apex:column headerclass="ct" value="{!c.ESTARfield}" headerValue="ESTAR Field Ratings" width="10%" styleclass="ct-color-1" />
+                <apex:column headerclass="ct" value="{!c.ESTARfieldQaComplete}" headerValue="ESTAR Field QA Created" width="10%" styleclass="ct-color-1" />
+                <apex:column headerclass="ct" value="{!c.TotalFieldQaNeed }" headerValue="# TotalFieldQaNeed " width="10%" styleclass="ct-color-2" />
+                <apex:column headerclass="ct" value="{!c.ESTARfieldQaNeed}" headerValue="# ESTARfieldQaNeed" width="10%" styleclass="ct-color-2" />
+
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+</apex:page>
