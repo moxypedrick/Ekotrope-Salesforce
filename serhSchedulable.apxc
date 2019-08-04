@@ -1,20 +1,23 @@
 global class serhSchedulable implements Schedulable{
     global void execute(SchedulableContext sc){
-
-        String username = '';
-    	String password = '';
+        
+        Account credentials = [Select id, Ekotrope_Password__c, Ekotrope_Username__c from Account WHERE Name = 'Southface'];
+		system.debug(credentials.Ekotrope_Password__c);
+      
+        String username = credentials.Ekotrope_Username__c;
+    	String password = credentials.Ekotrope_Password__c;
         //Encrypt the Username and password:
         Blob headerValue = Blob.valueOf(username + ':' + password);
         String authorization = ('Basic ' + EncodingUtil.base64Encode(headerValue));
-
-
+    	system.debug(authorization);
+        
         list<string> codes = new list<string>();
         codes.add('EnergyStarV3');
     	codes.add('IECC2009Performance');
     	codes.add('IECC2012Performance');
     	codes.add('DOEZeroEnergyReady');
     	codes.add('DukeNCHEROPerformance');
-
+        
         SERH updateNewProjects = new SERH();
         updateNewProjects.setAuthorization(authorization);
         updateNewProjects.setCodesToCheck(codes);
@@ -22,7 +25,7 @@ global class serhSchedulable implements Schedulable{
         updateNewProjects.setSERHDataName('HERS');
         updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
-
+        
         SERH updateRegisteredProjects = new SERH();
         updateRegisteredProjects.setAuthorization(authorization);
         updateRegisteredProjects.setCodesToCheck(codes);
@@ -30,10 +33,10 @@ global class serhSchedulable implements Schedulable{
         updateRegisteredProjects.setSERHDataName('HERS');
         updateRegisteredProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id submittedProjectBatchId = Database.executeBatch(updateRegisteredProjects,15);
-
+        
         SERH_uploadToBuildingRegistry uploadProjects = new SERH_uploadToBuildingRegistry();
         uploadProjects.setAuthorization(authorization);
         Id uploadProjectBatchId = Database.executeBatch(uploadProjects, 2);
-
+        
     }
 }

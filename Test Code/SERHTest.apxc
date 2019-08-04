@@ -1,12 +1,12 @@
 @IsTest
 public class SERHTest {
-
+           
     static testMethod void TestRecordConstructer(){
         Account testacct = new Account(name='Ecosouth Green Building Services', Ekotrope_ID__c='PKYGl435');
         insert(testacct);
         Contact joeTesta = new Contact(LastName = 'Testa', FirstName = 'Joe', accountid=testacct.id);
         insert(joeTesta);
-
+        
         String HOUSEjson = '{'+
 		'    \"id\": \"g3pRyvPB\",'+
 		'    \"name\": \"Grayhawk 6028 Townes Way 44DSTH Inner Unit\",'+
@@ -140,7 +140,7 @@ public class SERHTest {
 		'            \"code\": \"EnergyStarV3\",'+
 		'            \"complianceStatus\": \"Warn\",'+
 		'            \"targetHers\": 12'+
-		'        },'+
+		'        },'+    
         '        {'+
 		'            \"code\": \"IECC2012Performance\",'+
 		'            \"complianceStatus\": \"Pass\",'+
@@ -195,7 +195,7 @@ public class SERHTest {
 		'        }'+
 		'    }'+
 		'}';
-
+        
         String housePlanJson = '{'+
 		'    \"id\": \"g3pRyvPB\",'+
 		'    \"name\": \"Grayhawk 6028 Townes Way 44DSTH Inner Unit\",'+
@@ -939,9 +939,9 @@ public class SERHTest {
 		'        \"buildingType\": \"EkotropeAsModeled\",'+
 		'        \"unitsInBuilding\": 5'+
 		'    }'+
-            '}';
-
-
+            '}';     
+        
+        
         String json = '{'+
 		'    \"id\": \"jL98DZr2\",'+
 		'    \"name\": \"Grayhawk 6028 Townes Way 44DSTH  \",'+
@@ -1056,158 +1056,158 @@ public class SERHTest {
 		'    ],'+
 		'    \"algorithmVersion\": \"2.2.5\"'+
 		'}';
-
-
+        
+        
         analysisJson2Apex.pAnalysisJson2Apex hPlan = analysisJson2Apex.pAnalysisJson2Apex.parse(HOUSEjson);
-
-
-
+       
+        
+        
         // projectJSON2Apex.aProjectJSON2Apex qProject = projectJSON2Apex.parse(newProject);
 		projectJSON2Apex.aProjectJSON2Apex aProject = projectJSON2Apex.aProjectJSON2Apex.parse(json);
 		projectJSON2Apex.aProjectJSON2Apex dProject = projectJSON2Apex.aProjectJSON2Apex.parse(djson);
-		planJson2Apex.aPlanJson2Apex housePlanApex = planJson2Apex.aPlanJson2Apex.parse(housePlanJson);
-
+		planJson2Apex.aPlanJson2Apex housePlanApex = planJson2Apex.aPlanJson2Apex.parse(housePlanJson);  
+        
         list<string> codes = new list<string>();
         codes.add('EnergyStarV3');
     	codes.add('IECC2009Performance');
     	codes.add('IECC2012Performance');
     	codes.add('DOEZeroEnergyReady');
     	codes.add('DukeNCHEROPerformance');
-
+        
         SERH updateNewProjects = new SERH();
+        updateNewProjects.setAuthorization('auth');
         updateNewProjects.setCodesToCheck(codes);
         updateNewProjects.setVariables('SUBMITTED_FOR_QA');
         updateNewProjects.setSERHDataName('HERS');
         updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
-
+        
         SERH updateNewProjectsNonStandard = new SERH();
+        updateNewProjectsNonStandard.setAuthorization('auth');
         updateNewProjectsNonStandard.setCodesToCheck(codes);
         updateNewProjectsNonStandard.setVariables('SUBMITTED_FOR_QA');
         updateNewProjectsNonStandard.setSERHDataName('HERS');
         updateNewProjectsNonStandard.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         updateNewProjectsNonStandard.setRegRun(False);
         Id newProjectBatchIdNonStandard = Database.executeBatch(updateNewProjectsNonStandard,15);
-
-
+        
+        
         String HERSrater = '0033D00000OYKDi';
         String ratingOrganization = '0013D00000URCRQ';
         String status = 'SUBMITTED_TO_REGISTRY';
         String updateStatus = 'update status';
-
+        
         String dstatus = 'SUBMITTED_FOR_QA';
         String dupdateStatus = 'do not update';
-
+        
         test.startTest();
             Project__c newProject = SERH.constructProject(aProject, Hplan, HERSrater, joetesta.id, ratingOrganization, status, updateStatus);
             Project__c dnewProject = SERH.constructProject(dProject, Hplan, HERSrater, joetesta.id, ratingOrganization, dstatus, updateStatus);
             SERH_Data__c serhRecord = SERH.constructDataRecord(aProject, housePlanApex, hPlan, hPlan, hPlan, 'HERS');
+        	Inspections__c auto = SERH.constructAutoQaRecord(aProject);
         	system.assert(newProject != null);
-            system.assert(serhRecord != null);
+            system.assert(serhRecord != null);           
         test.stopTest();
-
+        
+        
+        
     }
-
+    
     static testMethod void TestPager(){
-
+            
         //bogus account
         Account duckedEsting = new Account(Name = 'Ducked Esting');
         insert(duckedEsting);
-
+        
         list<Contact> toIns = new list<Contact>();
         Contact estarFileNoRegFile = new Contact(FirstName = 'Bill', LastName = 'DingEnvelope',  accountid=duckedEsting.id);
         Contact noEstarFileRegFile = new Contact(FirstName = 'Sir', LastName = 'H', Number_of_Units_this_year_SERH__c = 201,  accountid=duckedEsting.id);
-
+        
         toIns.add(estarFileNoRegFile);
         toIns.add(noEstarFileRegFile);
-
+        
         insert(toIns);
-
+        
         list<Qualifications_del__c> toQuals = new list<Qualifications_del__c>();
         Qualifications_del__c qualEstarFileNoRegFile = new Qualifications_del__c(Qualifications_for__c =estarFileNoRegFile.id, Approved_for_Auto_Upload__c = True);
         Qualifications_del__c qualNoEstarFileRegFile = new Qualifications_del__c(Qualifications_for__c = noEstarFileRegFile.id, Approved_for_Auto_Upload__c = False);
-
+        
         toQuals.add(qualEstarFileNoRegFile);
         toQuals.add(qualNoEstarFileRegFile);
-
+        
         insert(toQuals);
-
+        
         list<inspections__c> insertInsp = new list<Inspections__c>();
         list<Project__C> insertProjects = new list<Project__c>();
-        list<id> projectList = new list<id>();
-
-        //estarFileNoRegFile
+        list<string> projectList = new list<string>();
+        Id rtId5 = [SELECT Id from Recordtype where name like '%SERH Project%' limit 1][0].Id;
+        
+        //estarFileNoRegFile 
         //one estar file
         //one reg file qa
         //no estar file qa
-        Project__c estarFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass', HERS_Rater__c = estarFileNoRegFile.id, EC_Registration_Date__c = date.newInstance(2018, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c estarFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass', HERS_Rater__c = estarFileNoRegFile.id, Project_Status__c = 'Pending Review', recordtypeid = '0120B000000t8JVQAY');
-        Project__c estarFile3 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass', HERS_Rater__c = estarFileNoRegFile.id, Project_Status__c = 'In Progress', recordtypeid = '0120B000000t8JVQAY');
-
-
-
-
-        insertProjects.add(estarFile);
-        insertProjects.add(estarFile2);
-        insertProjects.add(estarFile3);
-
-        //noEstarFileRegFile
+        Project__c estarFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass',Ekotrope_Id__c = 'b2JRnwW7', HERS_Rater__c = estarFileNoRegFile.id, EC_Registration_Date__c = date.newInstance(2018, 4, 3), recordtypeid = rtId5);
+        Project__c estarFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass',Ekotrope_Id__c = 'b2JRnwW8', HERS_Rater__c = estarFileNoRegFile.id, Project_Status__c = 'Pending Review', recordtypeid = rtId5);
+        Project__c estarFile3 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Pass',Ekotrope_Id__c = 'b2JRnwW9', HERS_Rater__c = estarFileNoRegFile.id, Project_Status__c = 'In Progress', recordtypeid = rtId5);
+        
+        
+        //noEstarFileRegFile 
         //one reg file
         //no reg file qa
         //no estar file qa
-        Project__c regFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail', HERS_Rater__c = noEstarFileRegFile.id, EC_Registration_Date__c = date.newInstance(2018, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c regFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail', HERS_Rater__c = noEstarFileRegFile.id, Project_Status__c = 'Pending Review', recordtypeid = '0120B000000t8JVQAY');
-        Project__c regFile3 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail', HERS_Rater__c = noEstarFileRegFile.id, Project_Status__c = 'In Progress', recordtypeid = '0120B000000t8JVQAY');
-
+        Project__c regFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail',Ekotrope_Id__c = 'b2JRnwW3', HERS_Rater__c = noEstarFileRegFile.id, EC_Registration_Date__c = date.newInstance(2018, 4, 3), recordtypeid = rtId5);
+        Project__c regFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail',Ekotrope_Id__c = 'b2JRnwW4', HERS_Rater__c = noEstarFileRegFile.id, Project_Status__c = 'Pending Review', recordtypeid = rtId5);
+        Project__c regFile3 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'Fail',Ekotrope_Id__c = 'b2JRnwW5', HERS_Rater__c = noEstarFileRegFile.id, Project_Status__c = 'In Progress', recordtypeid = rtId5);
+        
+        
+        Project__c testProj5 = new Project__c(Name='TestSERH', recordtypeid = rtId5, Ekotrope_Id__c = 'b2JRnwW2', Project_Status__c = 'In Progress');
+        Project__c test2Proj5 = new Project__c(Name='Test2SERH', recordtypeid = rtId5, Ekotrope_Id__c = 'throwErr', Project_Status__c = 'In Progress');
+     
+        insertProjects.add(estarFile);
+        insertProjects.add(estarFile2);
+        insertProjects.add(estarFile3);
         insertProjects.add(regFile);
         insertProjects.add(regFile2);
         insertProjects.add(regFile3);
-
-        insert(insertProjects);
-
-
-
-        insertInsp.add(new Inspections__c(Project__c = estarFile.id, HERS_Rater_Name_SERH__c = estarFileNoRegFile.id, QA_Year_SERH__c = '2018', recordTypeID = '0120B0000005kLU'));
+        insertProjects.add(testProj5);
+        insertProjects.add(test2Proj5);
+        
+        insert insertProjects;
+        
+        
+        
+        insertInsp.add(new Inspections__c(Project__c = estarFile.id, HERS_Rater_Name_SERH__c = estarFileNoRegFile.id, QA_Year_SERH__c = '2018', recordTypeID = '0120B0000005kLU'));    
         insertInsp.add(new Inspections__c(Project__c = regFile.id, HERS_Rater_Name_SERH__c = noEstarFileRegFile.id, QA_Year_SERH__c = '2018', recordTypeID = '0120B0000005kLU'));
-
-        insert(insertInsp);
-
-        projectList.add(regFile.id);
-        projectList.add(regFile2.id);
-        projectList.add(regFile3.id);
-        projectList.add(estarFile.id);
-        projectList.add(estarFile2.id);
-        projectList.add(estarFile3.id);
-        system.debug(projectList);
-
-
-        Id rtId5 = [SELECT Id from Recordtype where name like '%SERH Project%' limit 1][0].Id;
-        Project__c testProj5 = new Project__c(Name='TestSERH', recordtypeid = rtId5, Ekotrope_Id__c = 'b2JRnwW2', Project_Status__c = 'In Progress');
-        Project__c test2Proj5 = new Project__c(Name='Test2SERH', recordtypeid = rtId5, Ekotrope_Id__c = 'throwErr', Project_Status__c = 'In Progress');
-        List<Project__c> projList = new List<Project__c>();
-        projList.add(testProj5);
-        projList.add(test2Proj5);
-        insert(projList);
-
-
-
+        
+        insert insertInsp;
+        
+        projectList.add(regFile.Ekotrope_Id__c);
+        projectList.add(regFile2.Ekotrope_Id__c);
+        projectList.add(regFile3.Ekotrope_Id__c);
+        projectList.add(estarFile.Ekotrope_Id__c);
+        projectList.add(estarFile2.Ekotrope_Id__c);
+        projectList.add(estarFile3.Ekotrope_Id__c);
+        projectList.add(testProj5.Ekotrope_Id__c);
+        projectList.add(test2Proj5.Ekotrope_Id__c);
+     
+        
         Test.startTest();
         	Test.setMock(HttpCalloutMock.class, new YourHttpProjectList2());
         	String status = 'SUBMITTED_FOR_QA';
-        	String authorization = 'Basic ';
+        	
         	//List<List<String>> newProjectsList = SERH.getProjectUpdateList(authorization, status);
             SERH.constructInspectionRecord(estarFile.id);
-            SERH.constructAutoQaRecord(regFile.id);
-
+            //SERH.constructAutoQaRecord(regFile.id);
+        
             //SERH.uploadToBuildingRegistry();
-
+        
             SERH.determineQaNeed(projectList);
-
+            
         Test.stopTest();
     }
-
+    
     static testMethod void batchableTest(){
-
+        
         Integer listLength = 0;
                 //might have to insert some accounts for lines 108ish
         Account testacct = new Account(name='Ecosouth Green Building Services', Ekotrope_ID__c='PKYGl435');
@@ -1216,7 +1216,7 @@ public class SERHTest {
 
         insert(joeTesta);
         //check if RP&S is in there:
-
+        
         system.debug('JoeTestas Id in SF is ' + joeTesta.id + ', Ecousouths id is '+testacct.id);
         Qualifications_del__c joesQual = new Qualifications_del__c(Qualifications_for__c=joeTesta.id, HERS_RTIN_Rater_Identification_Number__c='9740236', SERH_HERS_Rater_or_HERS_Rater_Candidate__c='Yes');
         insert(joesQual);
@@ -1229,28 +1229,30 @@ public class SERHTest {
             codes.add('IECC2012Performance');
             codes.add('DOEZeroEnergyReady');
             codes.add('DukeNCHEROPerformance');
-
+        
         	//initialize the updater and give it some batches.
             SERH updater = new SERH();
+        	updater.setAuthorization('basic --');
             updater.setVariables('SUBMITTED_FOR_QA');
             updater.setCodesToCheck(codes);
             updater.setSERHDataName('HERS');
             updater.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
-
+            
             SERH updaterNonReg = new SERH();
+        	updaterNonReg.setAuthorization('basic ----');
             updaterNonReg.setVariables('SUBMITTED_FOR_QA');
             updaterNonReg.setRegRun(FALSE);
             updaterNonReg.setCodesToCheck(codes);
             updaterNonReg.setSERHDataName('2009 IECC');
             updaterNonReg.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
-
+        	
         	Id batchId = Database.executeBatch(updater,30);
             id batchIdnonRegRun = Database.executeBatch(updaterNonReg,30);
-
+            
         Test.stopTest();
         //check the records were updated correctly
 
         System.debug([select count() from SERH_Data__c where upload_date__c = today]);
     }
-
+    
 }

@@ -1,6 +1,5 @@
 global class SERH implements Database.Batchable<String>, Database.AllowsCallouts, Database.Stateful {
-    //global String username = '#########-###';
-    //global String password = '########';
+    
     global String newProjectsList = '';
     private String ekotropeStatus = '';
     private String updateStatus = '';
@@ -10,10 +9,9 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
     private string referenceBuilding = '';
     private string designBuilding = '';
     private string dataPrefix = '';
-    global Datetime lastSchedulableRunTime = Datetime.newInstance(1999, 1, 1, 12, 59, 59);
+    
 
-    //Encrypt the Username and password:
-    //global Blob headerValue = Blob.valueOf(username + ':' + password);
+    
     global String authorization = ''; //('Basic ' + EncodingUtil.base64Encode(headerValue));
 
 
@@ -25,8 +23,6 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
     global Map<String, String> projectMap = new Map<String, String>();
     global Map<String, String> serhDataMap = new Map<String, String>();
     global Map<String, String> raterMap = new Map<String, String>();
-    global Map<String, String> ekotropeMap = new Map<String, String>();
-    global Map<String, boolean> errorMap = new Map<String, boolean>();
     private final Map<String, List<String>> newList = new Map<String, List<String>>();
     private final List<string> codesToCheck = new List<string>();
     private final List<string> buildingsToCheck = new List<string>();
@@ -395,39 +391,32 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
         return inspectionRecord;
 	}
 
-    public static Inspections__c constructAutoQaRecord(ID projectID) {
+    public static Inspections__c constructAutoQaRecord(projectJSON2Apex.aProjectJSON2Apex project) {
         Project__c projectRecord;
         List<recordtype> recordTypeList = [select name, id from recordtype where name= 'Auto QA' and sobjecttype = 'Inspections__c'];
         id recordId = recordTypeList.get(0).id;
 
         list<Inspections__c> inspectionRecordList;
-        projectRecord = [SELECT HERS_Rater__c, Name, EC_Registration_Date__c, Energy_STAR_v3__c FROM Project__c WHERE ID = :projectID];
+        //projectRecord = [SELECT HERS_Rater__c, Name, EC_Registration_Date__c, Energy_STAR_v3__c FROM Project__c WHERE ID = :projectID];
 
-        inspectionRecordList = [SELECT Project_Temporary_Name__c, Status__c FROM Inspections__c WHERE RecordTypeId = :recordId and Project__c = :projectID];
-        // return a list that is an empty???
+        inspectionRecordList = [SELECT Project_Temporary_Name__c, Status__c FROM Inspections__c WHERE RecordTypeId = :recordId and Project__r.Ekotrope_ID__c = :project.id];
+        
+        // return a list that is an empty
         Inspections__c inspectionRecord;
         if(inspectionRecordList.size() == 0){
 
             //create an inspection
             inspectionRecord = null;
             string year;
-            if(projectRecord.EC_Registration_Date__c != null){
-                year = String.valueOf(projectRecord.EC_Registration_Date__c.year()); //
-            } else {
-                year = String.valueOf(datetime.now().year());
-            }
-            boolean estar = false;
-            if(projectRecord.Energy_Star_v3__c == 'Pass' || projectRecord.Energy_Star_v3__c == 'Certified'){
-                estar = true;
-            }
+            year = String.valueOf(datetime.now().year());
 
             inspectionRecord = new Inspections__c(
-                Project__c = projectID,
-                Project_Temporary_Name__c = projectRecord.Name,
+                //Project__c = projectID,
+                Project_Temporary_Name__c = project.location.streetAddress.abbreviate(80), 
                 QA_Year_SERH__c = year,
-                HERS_Rater_Name_SERH__c = projectRecord.HERS_Rater__c,
+                //HERS_Rater_Name_SERH__c = projectRecord.HERS_Rater__c,
                 Status__c = 'Ready for Review',
-                Energy_STAR__c = estar,
+                //Energy_STAR__c = estar,
                 RecordTypeId = recordId,
                 Date_of_Inspection__c = date.today()
             );
@@ -463,7 +452,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
         return projectStatus;
     }
 
-    public static void determineQaNeed(List<id> projectIds){
+    public static void determineQaNeed(List<string> projectIds){
         //This takes a list of project IDs and determines if any should
     	//be selected for File QA. This is based on need.
         // This determines the files that need File QA.
@@ -479,13 +468,16 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
 
 
         //iterate thru list
-        for(id projectId : projectIds){
+        //we could sort by HERS Rater and then economize on the QA need SOQL queries. 
+        //However, we generally are working with few files at a time. But it would 
+        //speed up all of the Ensign/Matt Wall file process - a majority of the work we do.
+        for(string projectId : projectIds){
             //get project with soql
              Project__c projectRecord;
              projectRecord = [SELECT HERS_Rater__c, Rating_Field_Inspector__c,
                               Project_Status__c, ID, Energy_STAR_v3__c,
                               Ekotrope_ID__c, Name
-                              FROM Project__c WHERE ID = :projectId];
+                              FROM Project__c WHERE Ekotrope_ID__c = :projectId];
              id hersRater = projectRecord.HERS_Rater__c;
 
 
@@ -613,7 +605,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
             }
         }
     }
-
+/*
     public static void uploadToBuildingRegistry(){
         //This uploads all projects that have status of "In Progress"
     	//to the building registry. If the project has an error
@@ -626,10 +618,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                                               and Project_Status__c = 'In Progress'])
             {uploadList.add(existingProject);}
 
-            String username = 'southface-api';
-            String password = 'wYFUCL5z';
-            Blob headerValue = Blob.valueOf(username + ':' + password);
-            String authorization = ('Basic ' + EncodingUtil.base64Encode(headerValue));
+            
             Date uploadDate = Date.today();
             System.debug(uploadList);
             for(project__c currentProj : uploadList){
@@ -677,7 +666,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                 //update currentProj;
             }
             update(uploadList);
-    }
+    }*/
 
     public static HttpResponse getProjectList(String authorization, String statusType){
         Http http = new Http();
@@ -755,7 +744,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
         HttpResponse putResponse;
         request.setEndpoint('https://api.ekotrope.com/api/v1/resnet/registeredProjects/'+planID);
         request.setMethod('PUT');
-        request.setHeader('authorization', 'Basic c291dGhmYWNlLWFwaTp3WUZVQ0w1eg==');
+        request.setHeader('authorization', authorization);
         request.setTimeout(20000);
         try{
             putResponse = http.send(request);
@@ -862,9 +851,8 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
 
     global Iterable<String> start(Database.BatchableContext bc){
         //Iterable for scheduled and batchable work in salesforce
-
         if(regularRun){
-            //newList = new Map<String, List<String>>(); <--we may have to put this somewhere
+            
             List<string> types = new List<string>();
             for(Project__c existingProject : [Select Ekotrope_ID__c, Ekotrope_selfOrPlanLastSavedAt__c
                                               FROM Project__c
@@ -881,10 +869,10 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
 
 
             String newProjectsList = String.valueOf(SERH.getprojectList(authorization, ekotropeStage).getBody());
-            System.Debug(newProjectsList);
+            
             List<projectListJSON2Apex> newProjects = projectListJSON2Apex.parse(newProjectsList);
             List<Object> newResults = (List<Object>)JSON.deserializeUntyped(newProjectsList);
-            System.Debug(newResults);
+            
             //Checks to see if the projects from ekotrope exist in salesforce
             //If it doesn't(=null) add the id to projectIdList
             //If it does, check to see if it ekotrope model has been changed recently.
@@ -910,9 +898,9 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
             }
        // return projectIdList;
         }else{
-             // Else we are just adding SERH Data to existing Projects
-        // Therefore we do not need a callout to ekotrope for project list
-        // we just need to get list of existing project and serh data ids
+            // Else we are just adding SERH Data to existing Projects
+            // Therefore we do not need a callout to ekotrope for project list
+            // we just need to get list of existing project and serh data ids
             for(Project__c existingProject : [Select Ekotrope_ID__c, Ekotrope_selfOrPlanLastSavedAt__c
                                               FROM Project__c
                                               WHERE Ekotrope_ID__c != null and RecordTypeId = '0120B000000t8JVQAY'])
@@ -929,24 +917,35 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                 }
             }
         }
-        System.debug(projectIdList);
+        
         return projectIdList;
     }
 
     global void execute(Database.BatchableContext bc, List<String> projectsToUpdate){
+        list<sObject> allObjects = new list<sObject>();
         if(regularRun){
-            for(Qualifications_del__c existingContact : [Select Qualifications_for__c,
-                                                     HERS_RTIN_Rater_Identification_Number__c
-                                                     FROM Qualifications_del__c
-                                                     WHERE HERS_RTIN_Rater_Identification_Number__c !=null ])
+            List<string> autoQaList = new List<string>();
+            List<Inspections__c> autoQaRecordList = new List<Inspections__c>();
+            String raterId = null;
+            String RFI_Rater = null;
+            String project_status = null;
+
+            for(Qualifications_del__c existingContact : [
+                Select Qualifications_for__c,
+                HERS_RTIN_Rater_Identification_Number__c
+                FROM Qualifications_del__c
+                WHERE HERS_RTIN_Rater_Identification_Number__c != null ])
             {raterMap.put(existingContact.HERS_RTIN_Rater_Identification_Number__c, existingContact.Qualifications_for__c);}
+            
+            
+
             for(Account existingAccounts : [Select Ekotrope_ID__c, Id FROM Account WHERE Ekotrope_ID__c != ''])
             {accountsMap.put(existingAccounts.Ekotrope_ID__c, existingAccounts.Id);}
 
             //iterate through all projects to create project records and serh data records;
             //check to see if any should not be auto-processed
         	for(String projectId:projectsToUpdate){
-
+                
                 if(newList.get(projectId)[1] == null){
                     ekotropeStatus = 'SUBMITTED_FOR_QA';
                 }else{
@@ -958,7 +957,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                 }else{
                     updateStatus = newList.get(projectId)[0];
                 }
-
+                system.debug(Limits.getCpuTime());
             	//if this is a test method we need to set the appropriate mock class
                 if (Test.isRunningTest()) {Test.setMock(HttpCalloutMock.class, new YourHttpProjectCalloutMockImplJG() ); }
                 HttpResponse projectResponse = SERH.getProject(authorization, projectId);
@@ -988,30 +987,40 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                 HttpResponse DesignanalysisResponse = SERH.getHousePlanAnalysis(authorization, qProject.masterPlanId, 'HERSRated', codesToCheck);
                 String DesignAnalysis = String.valueOf(DesignanalysisResponse.getBody());
                 analysisJson2Apex.pAnalysisJson2Apex DesignAnalysisResults = analysisJson2Apex.parse(DesignAnalysis);
+                system.debug(Limits.getCpuTime());
 
-
-                String HERS_Rater =  raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
-                String raterId = null;
-                String RFI_Rater = null;
-                String project_status = null;
+                Project__c existingProjectPlaceHolder = new Project__c(
+                    Ekotrope_ID__c = qProject.id
+                );
 
                 project_status = SERH.setProjectStatus(qProject, qplan, newList.get(projectId)[0], newList.get(projectId)[1]);
+                String HERS_Rater =  raterMap.get(String.valueOf(qProject.hersRatingDetails.rater.resnetRaterId));
+
+
+                
 
                 if (qProject.hersRatingDetails.associatedUsers.size() > 0){
-                    //Check to see if the RFI,Rater fiels are correct or did i put this in the recordConstructor
-                    //Need to put the ekotrope ids in a list of errors
-                    //That way I can process those and add the Auto QA Records
+                    //Check to see if the RFI, Rater entries are correct
+                    //If entry is incorrect (rater,rfi selected incorrect credential type) an Auto QA Record is generated to log that error. 
+                    //The inspection record is assigned to the place holder project for upsert. 
+                    //If no error, this returns the correct rater/rfi ids. 
                     if (qProject.hersRatingDetails.associatedUsers[0].userType == 'Rater'){
                         if(qProject.hersRatingDetails.associatedUsers[0].resnetRaterId == ''){
                             project_status = 'Error';
-                            errormap.put(qProject.id, True);
+                            Inspections__c inspectionRecord = SERH.constructAutoQaRecord(qProject);
+                            inspectionRecord.Project__r = existingProjectPlaceHolder;
+                            inspectionRecord.mismatched_RTIN__c = TRUE;
+                            autoQaRecordList.add(inspectionRecord);
                         } else{
                             raterId = qProject.hersRatingDetails.associatedUsers[0].resnetRaterId;
                               }
                     } else if (qProject.hersRatingDetails.associatedUsers[0].userType == 'FieldInspector'){
                         if(qProject.hersRatingDetails.associatedUsers[0].fieldInspectorId == ''){
                             project_status = 'Error';
-                            errormap.put(qProject.id, True);
+                            Inspections__c inspectionRecord = SERH.constructAutoQaRecord(qProject);
+                            inspectionRecord.Project__r = existingProjectPlaceHolder;
+                            inspectionRecord.mismatched_RTIN__c = TRUE;
+                            autoQaRecordList.add(inspectionRecord);
                         } else{
                             raterId = qProject.hersRatingDetails.associatedUsers[0].fieldInspectorId;
                         }
@@ -1026,56 +1035,30 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
                 String ratingOrganization = accountsMap.get(String.valueof(qProject.hersRatingDetails.rater.ratingCompany.id));
                 Project__c projectRecord = SERH.constructProject(qProject, AsIsAnalysisResults, HERS_Rater, RFI_Rater, ratingOrganization, project_status, newList.get(projectId)[0]);
                 SERH_Data__c SerhRecord = SERH.constructDataRecord(qProject, qplan, AsIsAnalysisResults, ReferencenalysisResults, DesignAnalysisResults, dataPrefix);
-
-                ekotropeMap.put(qProject.masterPlanId, qProject.id);
+                SerhRecord.Project__r = existingProjectPlaceHolder;
+                
+                
                 ekotropeIdList.add(projectRecord);
                 serhDataList.add(serhRecord);
+
+                //If the projectRecord has status of 'In Progress' we need to add it to the list of 
+                //files we want to push through the auto qa select process.
+
+                if(projectRecord.Project_Status__c == 'In Progress'){
+                    autoQalist.add(projectRecord.Ekotrope_ID__c);
+                }   
             }
-
-
-            //Upsert projects to salesforce
+            
+            //Upsert projects, serhData, autoQaInspections to salesforce
             upsert ekotropeIdList Ekotrope_ID__c;
-
-            //create the RTIN Error Inspection Records
-            for (string ekotropeId:errormap.keySet()){
-                Project__c existingProject2 = [Select id FROM Project__c WHERE RecordTypeId='0120B000000t8JVQAY' and Ekotrope_ID__c = :ekotropeId];
-                Inspections__c inspectionRecord = SERH.constructAutoQaRecord(existingProject2.id);
-                inspectionRecord.mismatched_RTIN__c = TRUE;
-                upsert inspectionRecord;
-            }
-
-            //Determine which new files with status 'In Progress' need to be QA'd
-            //Also make a map of the Ekotrope IDs to the SF Project IDs for future reference when linking
-            //SERH data to Projects
-
-            List<id> autoQaList = new List<id>();
-            List<id> directProcessList = new List<id>();
-            List<id> projectList = new List<id>();
-
-            for (Project__c aProject : ekotropeIdList){
-                System.debug(aProject.Project_Status__c);
-                System.debug(aProject.Name);
-                //If we are are working with a new file that has status 'In Progress', push it through to AutoQA
-                projectList.add(aProject.id);
-
-                if(aProject.Project_Status__c == 'In Progress'){
-                    autoQalist.add(aProject.id);
-                }
-
-                projectMap.put(aProject.Ekotrope_ID__c, aProject.id);
-            }
+            upsert serhDataList SERH_Data__c.Fields.Ekotrope_Plan_ID__c;
+            upsert autoQaRecordList;
 
             SERH.determineQaNeed(autoQaList);
 
-            //Now assign the correct Project ID to each SERH_Data__c object
-            for(SERH_Data__c sData : serhDataList){
-                sData.Project__c = projectMap.get(ekotropeMap.get(sData.Ekotrope_Plan_ID__c));
-            }
-
-
-            upsert serhDataList SERH_Data__c.Fields.Ekotrope_Plan_ID__c;
             serhDataList.clear();
             ekotropeIdList.clear();
+            autoQaRecordList.clear();
         }
         else{
             for(String projectId:projectsToUpdate){
@@ -1119,7 +1102,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
             	serhDataList.add(serhRecord);
             }
 
-        //upsert ekotropeIdList Project__c.Fields.Ekotrope_ID__c;
+            //upsert ekotropeIdList Project__c.Fields.Ekotrope_ID__c;
             Map<String, String> idMap = new Map<String, String>();
             for(Serh_Data__c existingData : [Select Ekotrope_plan_id__c, id, Project__c
                                             From SERH_Data__c
@@ -1127,19 +1110,17 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
             {idMap.put(existingData.Ekotrope_Plan_Id__c, existingData.Project__c);}
 
 
-        for (Project__c aProject : ekotropeIdList){
-            projectMap.put(aProject.Ekotrope_ID__c, aProject.id);
-        }
-        for(SERH_Data__c sData : serhDataList){
-            sData.Project__c = idMap.get(sData.Ekotrope_Plan_ID__c);
-        }
-
- 		insert serhDataList;
-        serhDataList.clear();
-        ekotropeIdList.clear();
-
-
+            for (Project__c aProject : ekotropeIdList){
+                projectMap.put(aProject.Ekotrope_ID__c, aProject.id);
             }
+            for(SERH_Data__c sData : serhDataList){
+                sData.Project__c = idMap.get(sData.Ekotrope_Plan_ID__c);
+            }
+
+            insert serhDataList;
+            serhDataList.clear();
+            ekotropeIdList.clear();
+        }
     }
 
     global void finish(Database.BatchableContext bc){

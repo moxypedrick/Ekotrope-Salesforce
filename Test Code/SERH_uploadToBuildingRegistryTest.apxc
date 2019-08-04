@@ -9,7 +9,7 @@ private class SERH_uploadToBuildingRegistryTest {
 
         insert(joeTesta);
         //check if RP&S is in there:
-
+        
         system.debug('JoeTestas Id in SF is ' + joeTesta.id + ', Ecousouths id is '+testacct.id);
         Qualifications_del__c joesQual = new Qualifications_del__c(Qualifications_for__c=joeTesta.id, HERS_RTIN_Rater_Identification_Number__c='9740236', SERH_HERS_Rater_or_HERS_Rater_Candidate__c='Yes');
         insert(joesQual);
@@ -20,12 +20,12 @@ private class SERH_uploadToBuildingRegistryTest {
         	//initialize the updater and give it some batches.
             SERH_uploadToBuildingRegistry updater = new SERH_uploadToBuildingRegistry();
         	updater.setAuthorization('authorization token');
-
+    	
         	Id batchId = Database.executeBatch(updater,2);
-
+            
         Test.stopTest();
         //check the records were updated correctly
 
         System.debug([select count() from SERH_Data__c where upload_date__c = today]);
-    }
+    }	 
 }
