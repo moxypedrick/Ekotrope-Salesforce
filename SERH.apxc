@@ -3,7 +3,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
     global String newProjectsList = '';
     private String ekotropeStatus = '';
     private String updateStatus = '';
-    private String ekotropeStage = '';
+    private List<string> ekotropeStage = new List<string>();
     private boolean regularRun = True;
     private string baselineBuilding = '';
     private string referenceBuilding = '';
@@ -797,11 +797,11 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
         return newList;
     }
 
-    global void setVariables(String stage){
+    global void setVariables(list<string> stage){
         //This sets which Ekotrope Status this code queries from the Project List API
     	//The options are: "SUBMITTED_FOR_QA", "SUBMITTED_TO_REGISTRY", "UNREGISTERED",
     	//"REGISTERED_WITH_PROVIDER"
-        ekotropeStage = stage;
+        ekotropeStages = stage;
     }
 
     global void setRegRun(boolean regRun){
