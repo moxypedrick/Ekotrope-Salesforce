@@ -3,7 +3,7 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
     global String newProjectsList = '';
     private String ekotropeStatus = '';
     private String updateStatus = '';
-    private List<string> ekotropeStage = new List<string>();
+    private List<string> ekotropeStages = new List<string>();
     private boolean regularRun = True;
     private string baselineBuilding = '';
     private string referenceBuilding = '';
@@ -867,39 +867,41 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
             //string startDate = '2019-7-10';
             //string endDate = '2019-7-22';
 
-            List<projectListJSON2Apex> projectListResults = new List<ObprojectListJSON2Apexject>();
+            
 
             for(string ekoStage : ekotropeStages){
                 String newProjectList = String.valueOf(SERH.getprojectList(authorization, ekoStage).getBody());
                 List<projectListJSON2Apex> newProjects = projectListJSON2Apex.parse(newProjectsList);
-                newReprojectListResultssults.addAll(newProjects);
-            }
+                
+                List<Object> newResults = (List<Object>)JSON.deserializeUntyped(newProjectList);
 
-            List<Object> newResults = (List<Object>)JSON.deserializeUntyped(newReprojectListResultssults);
-
-            //Checks to see if the projects from ekotrope exist in salesforce
-            //If it doesn't(=null) add the id to projectIdList
-            //If it does, check to see if it ekotrope model has been changed recently.
-            //	If so add the id to the projectIdList
-            for(Object project : newResults){
+                for(Object project : newResults){
                 Map<String,Object> data = (Map<String,Object>)project;
                 List <String> subList = new List<String>();
                 if (projectMap.get(String.valueOf(data.get('id'))) == null) {
                     projectIdList.add(String.valueOf(data.get('id')));
                     subList.add('update status');
-                    subList.add(ekotropeStage);
+                    subList.add(ekoStage);
                     newList.put(String.valueOf(data.get('id')),subList);
                 } else  {
                     if(data.get('selfOrPlanLastSavedAt') != projectMap.get(String.valueOf(data.get('id')))){
                         projectIdList.add(String.valueOf(data.get('id')));
                         subList.add('no status update');
-                        subList.add(ekotropeStage);
+                        subList.add(ekoStage);
                         newList.put(String.valueOf(data.get('id')),subList);
                         //System.Debug('Sublist is ' + sublist.size()+' units long');
+                        }   
                     }
-
                 }
             }
+
+            
+
+            //Checks to see if the projects from ekotrope exist in salesforce
+            //If it doesn't(=null) add the id to projectIdList
+            //If it does, check to see if it ekotrope model has been changed recently.
+            //	If so add the id to the projectIdList
+            
        // return projectIdList;
         }else{
             // Else we are just adding SERH Data to existing Projects
