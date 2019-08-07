@@ -17,26 +17,19 @@ global class serhSchedulable implements Schedulable{
     	codes.add('IECC2012Performance');
     	codes.add('DOEZeroEnergyReady');
     	codes.add('DukeNCHEROPerformance');
+
+        list<string> statusList = new list<string>();
+        statusList.add('SUBMITTED_FOR_QA');
+        statusList.add('SUBMITTED_TO_REGISTRY');
+        
         
         SERH updateNewProjects = new SERH();
         updateNewProjects.setAuthorization(authorization);
         updateNewProjects.setCodesToCheck(codes);
-        updateNewProjects.setVariables('SUBMITTED_FOR_QA');
+        updateNewProjects.setVariables(statusList);
         updateNewProjects.setSERHDataName('HERS');
         updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
-        
-        SERH updateRegisteredProjects = new SERH();
-        updateRegisteredProjects.setAuthorization(authorization);
-        updateRegisteredProjects.setCodesToCheck(codes);
-        updateRegisteredProjects.setVariables('SUBMITTED_TO_REGISTRY');
-        updateRegisteredProjects.setSERHDataName('HERS');
-        updateRegisteredProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
-        Id submittedProjectBatchId = Database.executeBatch(updateRegisteredProjects,15);
-        
-        SERH_uploadToBuildingRegistry uploadProjects = new SERH_uploadToBuildingRegistry();
-        uploadProjects.setAuthorization(authorization);
-        Id uploadProjectBatchId = Database.executeBatch(uploadProjects, 2);
         
     }
 }
