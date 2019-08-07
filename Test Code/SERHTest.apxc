@@ -1067,31 +1067,8 @@ public class SERHTest {
 		projectJSON2Apex.aProjectJSON2Apex dProject = projectJSON2Apex.aProjectJSON2Apex.parse(djson);
 		planJson2Apex.aPlanJson2Apex housePlanApex = planJson2Apex.aPlanJson2Apex.parse(housePlanJson);  
         
-        list<string> codes = new list<string>();
-        codes.add('EnergyStarV3');
-    	codes.add('IECC2009Performance');
-    	codes.add('IECC2012Performance');
-    	codes.add('DOEZeroEnergyReady');
-    	codes.add('DukeNCHEROPerformance');
-        
-        SERH updateNewProjects = new SERH();
-        updateNewProjects.setAuthorization('auth');
-        updateNewProjects.setCodesToCheck(codes);
-        updateNewProjects.setVariables('SUBMITTED_FOR_QA');
-        updateNewProjects.setSERHDataName('HERS');
-        updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
-        Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
-        
-        SERH updateNewProjectsNonStandard = new SERH();
-        updateNewProjectsNonStandard.setAuthorization('auth');
-        updateNewProjectsNonStandard.setCodesToCheck(codes);
-        updateNewProjectsNonStandard.setVariables('SUBMITTED_FOR_QA');
-        updateNewProjectsNonStandard.setSERHDataName('HERS');
-        updateNewProjectsNonStandard.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
-        updateNewProjectsNonStandard.setRegRun(False);
-        Id newProjectBatchIdNonStandard = Database.executeBatch(updateNewProjectsNonStandard,15);
-        
-        
+
+    
         String HERSrater = '0033D00000OYKDi';
         String ratingOrganization = '0013D00000URCRQ';
         String status = 'SUBMITTED_TO_REGISTRY';
@@ -1101,10 +1078,12 @@ public class SERHTest {
         String dupdateStatus = 'do not update';
         
         test.startTest();
-            Project__c newProject = SERH.constructProject(aProject, Hplan, HERSrater, joetesta.id, ratingOrganization, status, updateStatus);
+        	string projectStatus = SERH.setProjectStatus(aProject, housePlanApex, updateStatus, status);
+            Project__c newProject = SERH.constructProject(aProject, Hplan, HERSrater, joetesta.id, ratingOrganization, projectStatus, updateStatus);
             Project__c dnewProject = SERH.constructProject(dProject, Hplan, HERSrater, joetesta.id, ratingOrganization, dstatus, updateStatus);
             SERH_Data__c serhRecord = SERH.constructDataRecord(aProject, housePlanApex, hPlan, hPlan, hPlan, 'HERS');
         	Inspections__c auto = SERH.constructAutoQaRecord(aProject);
+            
         	system.assert(newProject != null);
             system.assert(serhRecord != null);           
         test.stopTest();
@@ -1192,20 +1171,47 @@ public class SERHTest {
      
         
         Test.startTest();
-        	Test.setMock(HttpCalloutMock.class, new YourHttpProjectList2());
-        	String status = 'SUBMITTED_FOR_QA';
+            //SERH.constructInspectionRecord(estarFile.id);
+            //SERH.determineQaNeed(projectList);
+        
+        	list<string> codes = new list<string>();
+            codes.add('EnergyStarV3');
+            codes.add('IECC2009Performance');
+            codes.add('IECC2012Performance');
+            codes.add('DOEZeroEnergyReady');
+            codes.add('DukeNCHEROPerformance');
+        
+            list<string> statusList = new list<string>();
+            statusList.add('SUBMITTED_FOR_QA');
+            //statusList.add('SUBMITTED_TO_REGISTRY');
         	
-        	//List<List<String>> newProjectsList = SERH.getProjectUpdateList(authorization, status);
-            SERH.constructInspectionRecord(estarFile.id);
-            //SERH.constructAutoQaRecord(regFile.id);
+        	list<string> statusList2 = new list<string>();
+            //statusList2.add('SUBMITTED_FOR_QA');
+            statusList2.add('SUBMITTED_TO_REGISTRY');
         
-            //SERH.uploadToBuildingRegistry();
+        	//initialize the updater and give it some batches.
+            SERH updater = new SERH();
+        	updater.setAuthorization('basic --');
+            updater.setVariables(statusList);
+            updater.setCodesToCheck(codes);
+            updater.setSERHDataName('HERS');
+            updater.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
+            
+            SERH updaterNonReg = new SERH();
+        	updaterNonReg.setAuthorization('basic ----');
+            updaterNonReg.setVariables(statusList2);
+            updaterNonReg.setRegRun(FALSE);
+            updaterNonReg.setCodesToCheck(codes);
+            updaterNonReg.setSERHDataName('2009 IECC');
+            updaterNonReg.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         
-            SERH.determineQaNeed(projectList);
+        	Id batchId = Database.executeBatch(updater,10);
+            id batchIdnonRegRun = Database.executeBatch(updaterNonReg,30);
             
         Test.stopTest();
     }
     
+    /*
     static testMethod void batchableTest(){
         
         Integer listLength = 0;
@@ -1230,29 +1236,37 @@ public class SERHTest {
             codes.add('DOEZeroEnergyReady');
             codes.add('DukeNCHEROPerformance');
         
+            list<string> statusList = new list<string>();
+            statusList.add('SUBMITTED_FOR_QA');
+            //statusList.add('SUBMITTED_TO_REGISTRY');
+        	
+        	list<string> statusList2 = new list<string>();
+            //statusList2.add('SUBMITTED_FOR_QA');
+            statusList2.add('SUBMITTED_TO_REGISTRY');
+        
         	//initialize the updater and give it some batches.
             SERH updater = new SERH();
         	updater.setAuthorization('basic --');
-            updater.setVariables('SUBMITTED_FOR_QA');
+            updater.setVariables(statusList);
             updater.setCodesToCheck(codes);
             updater.setSERHDataName('HERS');
             updater.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
             
             SERH updaterNonReg = new SERH();
         	updaterNonReg.setAuthorization('basic ----');
-            updaterNonReg.setVariables('SUBMITTED_FOR_QA');
+            updaterNonReg.setVariables(statusList2);
             updaterNonReg.setRegRun(FALSE);
             updaterNonReg.setCodesToCheck(codes);
             updaterNonReg.setSERHDataName('2009 IECC');
             updaterNonReg.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
         	
-        	Id batchId = Database.executeBatch(updater,30);
-            id batchIdnonRegRun = Database.executeBatch(updaterNonReg,30);
+        	Id batchId = Database.executeBatch(updater);
+            //id batchIdnonRegRun = Database.executeBatch(updaterNonReg,30);
             
         Test.stopTest();
         //check the records were updated correctly
 
         System.debug([select count() from SERH_Data__c where upload_date__c = today]);
-    }
+    }*/
     
 }
