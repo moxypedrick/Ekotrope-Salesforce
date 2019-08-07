@@ -1124,6 +1124,11 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
     }
 
     global void finish(Database.BatchableContext bc){
+        
+        SERH_uploadToBuildingRegistry uploadProjects = new SERH_uploadToBuildingRegistry();
+        uploadProjects.setAuthorization(authorization);
+        Id uploadProjectBatchId = Database.executeBatch(uploadProjects, 2);
+        
         projectMap.clear();
     }
 
