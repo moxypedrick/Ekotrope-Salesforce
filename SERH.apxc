@@ -1008,11 +1008,11 @@ global class SERH implements Database.Batchable<String>, Database.AllowsCallouts
 
             	SERH_Data__c SerhRecord = SERH.constructDataRecord(qProject, qplan, AsIsAnalysisResults, ReferencenalysisResults, DesignAnalysisResults, dataPrefix);
 
-            	//ekotropeIdList.add(projectRecord);
+            	
             	serhDataList.add(serhRecord);
             }
 
-            //upsert ekotropeIdList Project__c.Fields.Ekotrope_ID__c;
+            
             Map<String, String> idMap = new Map<String, String>();
             for(Serh_Data__c existingData : [Select Ekotrope_plan_id__c, id, Project__c
                                             From SERH_Data__c
