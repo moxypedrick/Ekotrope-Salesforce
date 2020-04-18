@@ -227,6 +227,8 @@ public class projectJSON2Apex {
 		public String name {get;set;}
 		public String userType {get;set;} 
 		public String fieldInspectorId {get;set;}
+        public String resnetRaterId {get;set;}
+        //public String userId {get; set;}
 		public AssociatedUsers(JSONParser parser) {
 			while (parser.nextToken() != System.JSONToken.END_OBJECT) {
 				if (parser.getCurrentToken() == System.JSONToken.FIELD_NAME) {
@@ -238,10 +240,13 @@ public class projectJSON2Apex {
 							userType = parser.getText();
 						} else if (text == 'fieldInspectorId') {
 							fieldInspectorId = parser.getText();
-						} else {
+                        } else if (text == 'resnetRaterId'){
+                            resnetRaterId = parser.getText();
+                        } 
+                        else {
 							System.debug(LoggingLevel.WARN, 'AssociatedUsers consuming unrecognized property: '+text);
 							consumeObject(parser);
-						}
+						} 
 					}
 				}
 			}

@@ -1096,7 +1096,10 @@ public class SERHTest {
             
         //bogus account
         Account duckedEsting = new Account(Name = 'Ducked Esting');
+        Account southface = new Account(Name = 'Southface', Ekotrope_Password__c = 'alkj13', Ekotrope_Username__c='2nkjl');
         insert(duckedEsting);
+        insert(southface);
+        
         
         list<Contact> toIns = new list<Contact>();
         Contact estarFileNoRegFile = new Contact(FirstName = 'Bill', LastName = 'DingEnvelope',  accountid=duckedEsting.id);
@@ -1191,14 +1194,14 @@ public class SERHTest {
         
         	//initialize the updater and give it some batches.
             SERH updater = new SERH();
-        	updater.setAuthorization('basic --');
+        	updater.setAuthorization();//'basic --'
             updater.setVariables(statusList);
             updater.setCodesToCheck(codes);
             updater.setSERHDataName('HERS');
             updater.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
             
             SERH updaterNonReg = new SERH();
-        	updaterNonReg.setAuthorization('basic ----');
+        	updaterNonReg.setAuthorization();//'basic ----'
             updaterNonReg.setVariables(statusList2);
             updaterNonReg.setRegRun(FALSE);
             updaterNonReg.setCodesToCheck(codes);

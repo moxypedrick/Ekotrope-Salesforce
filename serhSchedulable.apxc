@@ -1,16 +1,6 @@
 global class serhSchedulable implements Schedulable{
     global void execute(SchedulableContext sc){
-        
-        Account credentials = [Select id, Ekotrope_Password__c, Ekotrope_Username__c from Account WHERE Name = 'Southface'];
-		system.debug(credentials.Ekotrope_Password__c);
-      
-        String username = credentials.Ekotrope_Username__c;
-    	String password = credentials.Ekotrope_Password__c;
-        //Encrypt the Username and password:
-        Blob headerValue = Blob.valueOf(username + ':' + password);
-        String authorization = ('Basic ' + EncodingUtil.base64Encode(headerValue));
-    	system.debug(authorization);
-        
+       
         list<string> codes = new list<string>();
         codes.add('EnergyStarV3');
     	codes.add('IECC2009Performance');
@@ -20,21 +10,21 @@ global class serhSchedulable implements Schedulable{
 
         list<string> statusList = new list<string>();
         if (Test.isRunningTest()){
-            system.debug('Need to write complicated test code or I can do this:');
+            system.debug('Need to write complicated test code or I can do this');
         	statusList.add('SUBMITTED_FOR_QA');
         } else{
             statusList.add('SUBMITTED_FOR_QA');
             statusList.add('SUBMITTED_TO_REGISTRY');   
         }
-        
-        
-        
+   
         SERH updateNewProjects = new SERH();
-        updateNewProjects.setAuthorization(authorization);
+        //updateNewProjects.setAuthorization(authorization);
+        updateNewProjects.setAuthorization();
         updateNewProjects.setCodesToCheck(codes);
         updateNewProjects.setVariables(statusList);
         updateNewProjects.setSERHDataName('HERS');
         updateNewProjects.setBuildingRun('EkotropeAsModeled', 'HERSReference', 'HERSRated');
+        System.debug('here');
         Id newProjectBatchId = Database.executeBatch(updateNewProjects,15);
         
     }

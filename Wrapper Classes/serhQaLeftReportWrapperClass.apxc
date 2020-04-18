@@ -3,8 +3,12 @@ public class serhQaLeftReportWrapperClass {
 
     public List<cContact> contactList{get; set;}
     public map<String, cContact> mapNametoWrapper = new map<String, cContact>();
-
+ 	
+    
     public List<cContact> getContacts(){
+        String yearStr = string.valueof(System.Today().year());
+        
+        
         if(contactList == null){
             contactList = new List<cContact>();
 
@@ -74,7 +78,17 @@ public class serhQaLeftReportWrapperClass {
                                                  and EC_Registration_Date__c = Null)
                                            Group By Rating_Field_Inspector__r.name]){
                                                String FieldRaterName = string.valueof(pEstarField.get('name'));
-                                               mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                               if(mapNametoWrapper.get(FieldRaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                                   Contact.Name = FieldRaterName;
+                                                   mapNametoWrapper.put(FieldRaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                                   //mapNametoWrapper.get(RaterName).ESTARfileQaNeed = Math.ceil(mapNametoWrapper.get(RaterName).ESTARfield/10);
+                                               }
+                                               //mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
                                            }
             for(AggregateResult pEstarFile: [select HERS_Rater__r.name, count(id)
                                            from project__c
@@ -93,30 +107,60 @@ public class serhQaLeftReportWrapperClass {
                                            and EC_Registration_Date__c = Null)
                                            Group By HERS_Rater__r.name]){
                                                String RaterName = string.valueof(pEstarFile.get('name'));
-                                               mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                               if(mapNametoWrapper.get(RaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                                   Contact.Name = RaterName;
+                                                   mapNametoWrapper.put(RaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                                   //mapNametoWrapper.get(RaterName).ESTARfileQaNeed = Math.ceil(mapNametoWrapper.get(RaterName).ESTARfield/10);
+                                               }
+                                               //mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
                                              }
             for(AggregateResult pEstarFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and Energy_Star__c = TRUE
                                            and recordTypeID = '0120B0000005kLZQAY'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pEstarFileQA.get('name'));
-                                               mapNametoWrapper.get(RaterName).ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
+                                                if(mapNametoWrapper.get(RaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
+                                                   Contact.Name = RaterName;
+                                                   mapNametoWrapper.put(RaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(RaterName).ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
+                                                   //mapNametoWrapper.get(RaterName).ESTARfileQaNeed = Math.ceil(mapNametoWrapper.get(RaterName).ESTARfield/10);
+                                               }
+                                               //mapNametoWrapper.get(RaterName).ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
                                            }
 
             for(AggregateResult pEstarFieldQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and Energy_Star__c = TRUE
                                            and recordTypeID = '0120B0000005kLU'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pEstarFieldQA.get('name'));
-                                              mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                               if(mapNametoWrapper.get(RaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                                   Contact.Name = RaterName;
+                                                   mapNametoWrapper.put(RaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                                   //mapNametoWrapper.get(RaterName).ESTARfileQaNeed = Math.ceil(mapNametoWrapper.get(RaterName).ESTARfield/10);
+                                               }
+                                              //mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
                                            }
              for(AggregateResult pFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and recordTypeID = '0120B0000005kLZQAY'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pFileQA.get('name'));
@@ -133,7 +177,7 @@ public class serhQaLeftReportWrapperClass {
                                            }
             for(AggregateResult pFieldQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and recordTypeID = '0120B0000005kLU'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pFieldQA.get('name'));

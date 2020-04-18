@@ -12,16 +12,16 @@ private class SERH_uploadToBuildingRegistryTest {
         
         system.debug('JoeTestas Id in SF is ' + joeTesta.id + ', Ecousouths id is '+testacct.id);
         Qualifications_del__c joesQual = new Qualifications_del__c(Qualifications_for__c=joeTesta.id, HERS_RTIN_Rater_Identification_Number__c='9740236', SERH_HERS_Rater_or_HERS_Rater_Candidate__c='Yes');
-        insert(joesQual);
+        insert(joesQual);//eiErrhtd
         insert(new Project__c(recordtypeid='0120B000000t8JVQAY', name='Ray Ter', Ekotrope_Id__c = 'eightdig', Project_status__c = 'In Progress'));
-		insert(new Project__c(recordtypeid='0120B000000t8JVQAY', name='Ray Ter', Ekotrope_Id__c = 'eiErrhtd', Project_status__c = 'In Progress'));
-        //insert(new Project__c(recordtypeid='0120B000000t8JVQAY', name='Ray Ter', Ekotrope_Id__c = 'enull_id', Project_status__c = 'In Progress'));
+		//insert(new Project__c(recordtypeid='0120B000000t8JVQAY', name='Ray Ter', Ekotrope_Id__c = 'eightdig', Project_status__c = 'In Progress'));
+        insert(new Project__c(recordtypeid='0120B000000t8JVQAY', name='Ray Ter', Ekotrope_Id__c = 'enull_id', Project_status__c = 'In Progress'));
         Test.startTest();
         	//initialize the updater and give it some batches.
             SERH_uploadToBuildingRegistry updater = new SERH_uploadToBuildingRegistry();
         	updater.setAuthorization('authorization token');
     	
-        	Id batchId = Database.executeBatch(updater,2);
+        	Id batchId = Database.executeBatch(updater,3);
             
         Test.stopTest();
         //check the records were updated correctly

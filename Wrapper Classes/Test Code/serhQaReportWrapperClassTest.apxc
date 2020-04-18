@@ -5,6 +5,7 @@
         serhQaReportWrapperClass clss2 = new serhQaReportWrapperClass();
         //clss2.cContact
         clss2.getContacts();
+        Integer year = System.Today().year();
 
         //bogus account
         Account duckedEsting = new Account(Name = 'Ducked Esting');
@@ -13,7 +14,7 @@
         //bogus contacts -- with various rating statuses
         list<Contact> toIns = new list<Contact>();
         Contact Bill = new Contact(FirstName = 'Bill', LastName = 'DingEnvelope',  accountid=duckedEsting.id);
-        Contact Sir = new Contact(FirstName = 'Sir', LastName = 'H', Number_of_Units_this_year_SERH__c = 201,  accountid=duckedEsting.id);
+      	Contact Sir = new Contact(FirstName = 'Sir', LastName = 'H', Number_of_Units_this_year_SERH__c = 201,  accountid=duckedEsting.id);
         Contact Sir2 = new Contact(FirstName = 'Sir2', LastName = 'H', Number_of_Units_this_year_SERH__c = 201,  accountid=duckedEsting.id);
         
         Contact R = new Contact(FirstName = 'R', LastName = 'Fortinay', Number_of_Units_this_year_SERH__c = 277,  Number_of_File_QA_Started__c = 1, accountid=duckedEsting.id);
@@ -29,21 +30,21 @@
         insert(toIns);
         
         list<Project__C> insertProjects = new list<Project__c>();
-        Project__c regFile = new Project__C(Name = '123 Main', HERS_Rater__c = Bill.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c regField = new Project__C(Name = '123 Main', Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c regFileA = new Project__C(Name = '123 Main', HERS_Rater__c = Bill.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c regField = new Project__C(Name = '123 Main', Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
         
-        Project__c estarFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass', HERS_Rater__c = R.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c estarField = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',Rating_Field_Inspector__c = R2.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c estarFile = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass', HERS_Rater__c = R.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c estarField = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',Rating_Field_Inspector__c = R2.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
         
-        Project__c regFile2 = new Project__C(Name = '123 Main', HERS_Rater__c = Bill.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c regField2 = new Project__C(Name = '123 Main', Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c regFile2 = new Project__C(Name = '123 Main', HERS_Rater__c = Bill.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c regField2 = new Project__C(Name = '123 Main', Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
         
-        Project__c estarFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',HERS_Rater__c = R.id, Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
-        Project__c estarField2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',Rating_Field_Inspector__c = R2.id, EC_Registration_Date__c = date.newInstance(2019, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c estarFile2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',HERS_Rater__c = R.id, Rating_Field_Inspector__c = Sir.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
+        Project__c estarField2 = new Project__C(Name = '123 Main', Energy_Star_v3__c = 'pass',Rating_Field_Inspector__c = R2.id, EC_Registration_Date__c = date.newInstance(2020, 4, 3), recordtypeid = '0120B000000t8JVQAY');
         
         
         
-        insertProjects.add(regFile);
+        insertProjects.add(regFileA);
         insertProjects.add(regFile2);
         insertProjects.add(estarFile);
         insertProjects.add(estarFile2);
@@ -54,14 +55,16 @@
         insert(insertProjects);
         
         list<inspections__c> insertInsp = new list<Inspections__c>();
-        insertInsp.add(new Inspections__c(Project__c = regFile.id, HERS_Rater_Name_SERH__c = Bill.id, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLU'));
-        insertInsp.add(new Inspections__c(Project__c = regFile.id, HERS_Rater_Name_SERH__c = Bill.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLU'));
-        insertInsp.add(new Inspections__c(Project__C = regFile.id, HERS_Rater_Name_SERH__c = Sir.id, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLZQAY'));
-        insertInsp.add(new Inspections__c(Project__C = regFile.id, HERS_Rater_Name_SERH__c = Sir.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLZQAY'));
-        insertInsp.add(new Inspections__c(Project__C = regFile.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLZQAY'));
+        insertInsp.add(new Inspections__c(Project__c = regFileA.id, HERS_Rater_Name_SERH__c = Bill.id, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLU'));
+        insertInsp.add(new Inspections__c(Project__c = regFileA.id, HERS_Rater_Name_SERH__c = Bill.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLU'));
+        insertInsp.add(new Inspections__c(Project__C = regFileA.id, HERS_Rater_Name_SERH__c = Sir.id, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLZQAY'));
+        insertInsp.add(new Inspections__c(Project__C = regFileA.id, HERS_Rater_Name_SERH__c = Sir.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLZQAY'));
+        insertInsp.add(new Inspections__c(Project__C = regFileA.id, Energy_Star__c = TRUE, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLZQAY'));
         
-        insertInsp.add(new Inspections__c(Project__c = regFile.id, HERS_Rater_Name_SERH__c = R3.id, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLU'));
-        insertInsp.add(new Inspections__c(Project__C = regFile.id, HERS_Rater_Name_SERH__c = R4.id, QA_Year_SERH__c = '2019', recordTypeID = '0120B0000005kLZQAY'));
+        insertInsp.add(new Inspections__c(Project__c = regFileA.id, HERS_Rater_Name_SERH__c = R3.id, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLU'));
+        insertInsp.add(new Inspections__c(Project__C = regFileA.id, HERS_Rater_Name_SERH__c = R4.id, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLZQAY'));
+        insertInsp.add(new Inspections__c(Project__C = regFileA.id, HERS_Rater_Name_SERH__c = R.id, QA_Year_SERH__c = '2020', recordTypeID = '0120B0000005kLZQAY'));
+
         
         insert(insertInsp); 
         //create some bogus projects add give them to the bogus accounts
@@ -75,6 +78,8 @@
             System.Debug('checking'+ n.name);
             //System.assert(condition)
         }
+        clss3.year=2018;
+        clss3.getContacts();
         Test.stopTest();
         
     }

@@ -7,15 +7,17 @@ public class serhQaReportWrapperClass {
     public List<cContact> getContacts(){
         map<String, cContact> mapNametoWrapper = new map<String, cContact>();
         contactList = null;
-        if(this.year == null){
-            year = 2019;
+        //year = System.Today().year();
+        system.debug(year);
+        if(year == null){
+            year = System.Today().year();
         } else {
-            year = this.year;
+            year = year;
         }
 
         Date Start_Date = Date.newInstance(year, 1, 1);
         Date End_Date = Date.newInstance(year, 12, 31);
-        String yearStr = string.valueof(this.year);
+        String yearStr = string.valueof(year);
         system.debug(yearStr);
 
         if(contactList == null){
@@ -90,7 +92,16 @@ public class serhQaReportWrapperClass {
                                                  and EC_Registration_Date__c = Null)
                                            Group By Rating_Field_Inspector__r.name]){
                                                String FieldRaterName = string.valueof(pEstarField.get('name'));
-                                               mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                               if(mapNametoWrapper.get(FieldRaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                                   Contact.Name = FieldRaterName;
+                                                   mapNametoWrapper.put(FieldRaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
+                                                   }
+                                               //mapNametoWrapper.get(FieldRaterName).ESTARfield = Double.valueOf(pEstarField.get('expr0'));
                                            }
             for(AggregateResult pEstarFile: [select HERS_Rater__r.name, count(id)
                                            from project__c
@@ -110,7 +121,16 @@ public class serhQaReportWrapperClass {
                                                 and EC_Registration_Date__c = Null)
                                            Group By HERS_Rater__r.name]){
                                                String RaterName = string.valueof(pEstarFile.get('name'));
-                                               mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                               if(mapNametoWrapper.get(RaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                                   Contact.Name = RaterName;
+                                                   mapNametoWrapper.put(RaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
+                                                   }
+                                               //mapNametoWrapper.get(RaterName).ESTARfiles = Double.valueOf(pEstarFile.get('expr0'));
                                              }
             for(AggregateResult pEstarFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
@@ -140,7 +160,16 @@ public class serhQaReportWrapperClass {
                                            and recordTypeID = '0120B0000005kLU'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pEstarFieldQA.get('name'));
-                                              mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                               if(mapNametoWrapper.get(RaterName)==null){
+                                                   //make a cContact
+                                                   cContact Contact = new cContact();
+                                                   Contact.ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                                   Contact.Name = RaterName;
+                                                   mapNametoWrapper.put(RaterName, Contact);
+                                               } else{
+                                                   mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
+                                                   }
+                                              //mapNametoWrapper.get(RaterName).ESTARfieldQaComplete = Double.valueOf(pEstarFieldQA.get('expr0'));
                                            }
              for(AggregateResult pFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c

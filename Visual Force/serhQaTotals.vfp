@@ -12,7 +12,7 @@
                 <apex:column value="{!c.Name}" width="40%" />
                 <apex:column headerclass="ct" value="{!c.TotalFileQaLeft}" headerValue="File QA Left" width="15%" style="text-align: center" />
                 <apex:column headerclass="ct" value="{!c.TotalFieldQaLeft}" headerValue="Field QA Left" width="15%" style="text-align: center"  />
-                <apex:column headerclass="ct" value="{!c.ESTARfileQaLeft}" headerValue="ESTAR File QA Left" width="15%" style="text-align: center"  />
+                <apex:column headerclass="ct" value="{!c.ESTARfileQaLeft}" headerValue="ESTAR File QA Left" width="15%" style="text-align: center"  />  
                 <apex:column headerclass="ct" value="{!c.ESTARfieldQaLeft}" headerValue="ESTAR Field QA Left" width="15%" style="text-align: center"  />
             </apex:pageBlockTable>
         </apex:pageBlock>

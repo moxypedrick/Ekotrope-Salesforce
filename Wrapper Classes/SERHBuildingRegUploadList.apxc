@@ -8,32 +8,33 @@ public with sharing class SERHBuildingRegUploadList {
     List<ProjWrapper> projs {get;set;}
     private String state = '';
     public String lastRefresh {get; set;}
+    private String yearStr = string.valueof(System.Today().year());
 
     // instantiate the StandardSetController from a query locator
     public ApexPages.StandardSetController con {
         get {
             if(con == null) {
-                con = new ApexPages.StandardSetController(Database.getQueryLocator([Select name, id, Project_Status__c, Createddate,
+                con = new ApexPages.StandardSetController(Database.getQueryLocator([Select name, id, Project_Status__c, Createddate, 
                                                                                     Hers_Rater__c, hers_rater__r.Name,
                                                                                     Rating_Field_Inspector__c, Rating_Field_Inspector__r.Name,
                                                                                     hers_rater__r.number_of_needed_file_qa__c, Ekotrope_Link__c,
                                                                                     hers_rater__r.Number_of_File_QA_Started__c,
                                                                                     SERH_Number_of_Units__c, Number_of_Inspections__c,
                                                                                     Ekotrope_ID__c,
-                                                                                    (select ENERGY_STAR_v3__c, Rating_Type__c, Fee_per_Unit__c
+                                                                                    (select ENERGY_STAR_v3__c, Rating_Type__c, Fee_per_Unit__c 
                                                                                      from SERH_Data__r where Export_Type__c = 'HERS')
                                                                                     from project__c where Project_Status__c='In Progress'
                                                                                     and recordtypeid = '0120B000000t8JVQAY'
                                                                                     Order By Createddate desc limit 100]));
                 // sets the number of records in each page set
                 con.setPageSize(10);
-
+                
             }
             List<AsyncApexJob> jobList = [SELECT Id, Status, ApexClass.Name, completeddate
                       FROM AsyncApexJob where apexclass.name='SERH' and Status='Completed'
                       Order by CompletedDate desc limit 1];
             if (joblist.size()>0) lastRefresh = joblist.get(0).completedDate.format();
-
+                
             return con;
         }
         set;
@@ -47,7 +48,7 @@ public with sharing class SERHBuildingRegUploadList {
         System.Debug('found '+String.valueOf(projs.size()));
         return projs;
     }
-
+   
     // Uploads selected projects to building registry
     public PageReference process() {
          System.debug('begin process method');
@@ -68,7 +69,7 @@ public with sharing class SERHBuildingRegUploadList {
                  List<String> msgs = uploadtoRegistry.uploadToBuildingRegistry(projToUpload);
                  state = 'Finished.';
 
-
+         
          System.debug('messages from BuildingReg: ' + msgs.size());
          if(msgs.size() > 0){
              for (String idIter : msgs){
@@ -94,7 +95,7 @@ public with sharing class SERHBuildingRegUploadList {
              return null;
          }
      }
-
+    
     public void syncWithEkotrope(){
         serhSchedulable ssched = new serhSchedulable();
         if(!Test.isRunningTest()) ssched.execute(null);
@@ -140,7 +141,7 @@ public with sharing class SERHBuildingRegUploadList {
      // returns the previous page of records
      public void previous() {
          con.save();
-
+             
          con.previous();
      }
 
@@ -152,7 +153,7 @@ public with sharing class SERHBuildingRegUploadList {
 //This bit seems to break salesforce; commenting out to see if it helps
      // returns the PageReference of the original page, if known, or the home page.
     // public void cancel() {
-
+         
    //      con.cancel();
 //}
     public String getState(){
@@ -172,7 +173,7 @@ public with sharing class SERHBuildingRegUploadList {
         public String RatingType {get; set;}
 
         public ProjWrapper(){
-            proj = new Project__c();
+            proj = new Project__c(); 
             checked = false;
             creaxDate = 'no Project Entered';
             QAleft = 0;
@@ -205,7 +206,7 @@ public with sharing class SERHBuildingRegUploadList {
                 RatingType = currDat.Rating_Type__c;
                 ESv3Status = currDat.ENERGY_STAR_v3__c;
                 feePerUnit = currDat.Fee_per_Unit__c;
-
+                
             } else{
                 RatingType = '';
                 ESv3Status = '';
@@ -225,29 +226,29 @@ public with sharing class SERHBuildingRegUploadList {
     }
 **/
 }
-
-
+     
+    
     public List<cContact> contactList{get; set;}
-
+    
     public map<String, cContact> mapNametoWrapper = new map<String, cContact>();
-
+    
     public List<cContact> getContacts(){
         if(contactList == null){
             contactList = new List<cContact>();
-
+            
             for(AggregateResult pRegFile: [select HERS_Rater__r.name, count(id)
                                            from project__c
                                            Where (EC_Registration_Date__c = THIS_YEAR
                                            and recordtypeid = '0120B000000t8JVQAY')
-
-                                           or (recordtypeid = '0120B000000t8JVQAY'
+                                           
+                                           or (recordtypeid = '0120B000000t8JVQAY' 
                                            and Project_Status__c = 'pending review'
                                               and EC_Registration_Date__c = Null)
-
-                                           or (recordtypeid = '0120B000000t8JVQAY'
+                                           
+                                           or (recordtypeid = '0120B000000t8JVQAY' 
                                            and Project_Status__c = 'in progress'
                                            and EC_Registration_Date__c = Null)
-
+                                           
                                            Group By HERS_Rater__r.name]){
                                                String RaterName = string.valueof(pRegFile.get('name'));
                                                if(mapNametoWrapper.get(RaterName)==null){
@@ -258,7 +259,7 @@ public with sharing class SERHBuildingRegUploadList {
                                                    mapNametoWrapper.put(RaterName, Contact);
                                                } else{
                                                    mapNametoWrapper.get(RaterName).TotalFiles = Double.valueOf(pRegFile.get('expr0'));
-                                                  }
+                                                  }   
                                            }
 
             for(AggregateResult pEstarFile: [select HERS_Rater__r.name, count(id)
@@ -266,13 +267,13 @@ public with sharing class SERHBuildingRegUploadList {
                                            Where (EC_Registration_Date__c = THIS_YEAR
                                            and Energy_Star_v3__c = 'pass'
                                            and recordtypeid = '0120B000000t8JVQAY')
-
-                                             or (recordtypeid = '0120B000000t8JVQAY'
+                                           
+                                             or (recordtypeid = '0120B000000t8JVQAY' 
                                            and Energy_Star_v3__c = 'pass'
                                            and Project_Status__c = 'pending review'
                                            and EC_Registration_Date__c = Null)
-
-                                             or (recordtypeid = '0120B000000t8JVQAY'
+                                             
+                                             or (recordtypeid = '0120B000000t8JVQAY' 
                                            and Energy_Star_v3__c = 'pass'
                                            and Project_Status__c = 'in progress'
                                            and EC_Registration_Date__c = Null)
@@ -282,7 +283,7 @@ public with sharing class SERHBuildingRegUploadList {
                                              }
             for(AggregateResult pEstarFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and Energy_Star__c = TRUE
                                            and recordTypeID = '0120B0000005kLZQAY'
                                            Group By HERS_Rater_Name_SERH__r.name]){
@@ -295,13 +296,13 @@ public with sharing class SERHBuildingRegUploadList {
                                                    mapNametoWrapper.put(RaterName, Contact);
                                                } else{
                                                    mapNametoWrapper.get(RaterName).ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
-                                                  }
+                                                  } 
                                                //mapNametoWrapper.get(RaterName).ESTARfileQaComplete = Double.valueOf(pEstarFileQA.get('expr0'));
                                            }
-
+                                          
              for(AggregateResult pFileQA: [select HERS_Rater_Name_SERH__r.name, count(id)
                                            from inspections__c
-                                           Where QA_Year_SERH__c = '2019'
+                                           Where QA_Year_SERH__c = :yearStr
                                            and recordTypeID = '0120B0000005kLZQAY'
                                            Group By HERS_Rater_Name_SERH__r.name]){
                                                String RaterName = string.valueof(pFileQA.get('name'));
@@ -314,40 +315,40 @@ public with sharing class SERHBuildingRegUploadList {
                                                } else{
                                                    mapNametoWrapper.get(RaterName).TotalFileQaComplete = Double.valueOf(pFileQA.get('expr0'));
                                                    //mapNametoWrapper.get(RaterName).ESTARfileQaNeed = Math.ceil(mapNametoWrapper.get(RaterName).ESTARfield/10);
-                                               }
+                                               }   
                                            }
             for(String key: mapNametoWrapper.keySet()){
                 mapNametoWrapper.get(key).doMath();
                 if(mapNametoWrapper.get(key).ESTARfileQaLeft > 0 || mapNametoWrapper.get(key).TotalFileQaLeft > 0){
                     contactList.add(mapNametoWrapper.get(key));
-                }
+                }  
             }
         }
         return contactList;
     }
-
+  
     public class cContact {
         Public String Name {get; set;}
         Public Double ESTARfiles {get; set;}
         Public Double ESTARfileQaNeed {get; set;}
         Public Double ESTARfileQaComplete {get; set;}
         Public Double ESTARfileQaLeft {get; set;}
-
+        
         Public Double ESTARfield {get; set;}
         Public Double ESTARfieldQaNeed {get;set;}
         Public Double ESTARfieldQaComplete {get;set;}
         Public Double ESTARfieldQaLeft {get; set;}
-
+        
         Public Double TotalFiles {get; set;}
         Public Double TotalFileQaNeed {get; set;}
         Public Double TotalFileQaComplete {get; set;}
         Public Double TotalFileQaLeft {get; set;}
-
+        
         Public Double TotalFields {get; set;}
         Public Double TotalFieldQaNeed {get; set;}
-        Public Double TotalFieldQaComplete {get; set;}
+        Public Double TotalFieldQaComplete {get; set;} 
         Public Double TotalFieldQaLeft {get; set;}
-
+        
         Public void doMath(){
             if (ESTARfiles == null){
                 ESTARfiles = 0;
@@ -361,7 +362,7 @@ public with sharing class SERHBuildingRegUploadList {
             if (TotalFields == null){
                 TotalFields = 0;
             }
-
+            
             if (ESTARfileQaNeed == null){
                 ESTARfileQaNeed = 0;
             }
@@ -386,25 +387,25 @@ public with sharing class SERHBuildingRegUploadList {
             if(TotalFieldQaComplete==null){
                 TotalFieldQaComplete=0;
             }
-
+            
             ESTARfileQaNeed = Math.ceil(ESTARfiles/10);
             ESTARfieldQaNeed = Math.ceil(ESTARfield/100);
             TotalFileQaNeed = Math.ceil(TotalFiles/10);
             TotalFieldQaNeed = Math.ceil(TotalFields/100);
-
+            
             ESTARfileQaLeft = ESTARfileQaNeed - ESTARfileQaComplete;
        		ESTARfieldQaLeft = ESTARfieldQANeed - ESTARfieldQaComplete;
-
+            
             TotalFileQaLeft = TotalFileQaNeed - TotalFileQaComplete;
             TotalFieldQaLeft = TotalFieldQaNeed - TotalFieldQaComplete;
         }
-
-        //This is the contructor method. When we create a new cContact object we pass a
+       
+        //This is the contructor method. When we create a new cContact object we pass a 
         //Contact that is set to the con property. We also set the selected value to false
-        public cContact() {
+        public cContact() {  
         }
-    }
-
-
-
+    }   
+    
+    
+    
 }
